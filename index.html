@@ -937,7 +937,8 @@ function freshState(name){
     phase:'interstitial-pre', // before case 0 briefing, no interstitial needed for case 0
     decisionStep:0,
     decisionScoreThisCase:0,
-    results:[]
+    results:[],
+    optionOrders:{} // per-case, per-decision shuffled option order — randomized fresh each playthrough
   };
 }
 
@@ -1012,6 +1013,32 @@ async function teacherClearAll(){
   try{
     await fetch(KV_ENDPOINT, {method:'DELETE'});
   }catch(e){}
+}
+
+/* =====================================================================
+   RANDOMIZER — shuffles decision/quiz option order so the correct or
+   highest-value answer isn't predictably in the same position every game.
+   ===================================================================== */
+function shuffledIndices(n){
+  const arr = Array.from({length:n}, (_,i)=>i);
+  for(let i=arr.length-1; i>0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Returns a shuffled index order for a given case's decision, generating
+// it once per playthrough and persisting it so the order stays stable
+// across re-renders/reloads of the same decision (but is fresh every game).
+function getOptionOrder(caseId, decisionIndex, optionsLength){
+  if(!state.optionOrders) state.optionOrders = {};
+  if(!state.optionOrders[caseId]) state.optionOrders[caseId] = [];
+  if(!state.optionOrders[caseId][decisionIndex]){
+    state.optionOrders[caseId][decisionIndex] = shuffledIndices(optionsLength);
+    saveState();
+  }
+  return state.optionOrders[caseId][decisionIndex];
 }
 
 /* =====================================================================
@@ -1321,10 +1348,20 @@ function renderQuizPanel(c, rec, pointsLineEl){
 
 function renderQuizQuestions(area, questions, bonusPerQuestion, rec, pointsLineEl){
   area.innerHTML = '';
-  const answers = new Array(questions.length).fill(null);
+  // Shuffle each question's options once, remapping correctIndex to match,
+  // so the correct answer isn't predictably in the same position.
+  const shuffled = questions.map(q=>{
+    const order = shuffledIndices(q.options.length);
+    return {
+      question: q.question,
+      options: order.map(i=>q.options[i]),
+      correctIndex: order.indexOf(q.correctIndex)
+    };
+  });
+  const answers = new Array(shuffled.length).fill(null);
   const qDivs = [];
 
-  questions.forEach((q, qi)=>{
+  shuffled.forEach((q, qi)=>{
     const qDiv = el('div',{class:'quiz-question'});
     qDiv.appendChild(el('div',{class:'quiz-prompt'}, `${qi+1}. ${q.question}`));
     const optsDiv = el('div',{class:'quiz-options'});
@@ -1349,7 +1386,7 @@ function renderQuizQuestions(area, questions, bonusPerQuestion, rec, pointsLineE
       return;
     }
     let correctCount = 0;
-    questions.forEach((q, qi)=>{
+    shuffled.forEach((q, qi)=>{
       const btns = qDivs[qi].querySelectorAll('.quiz-option-btn');
       btns.forEach((b, oi)=>{
         b.disabled = true;
@@ -1365,7 +1402,7 @@ function renderQuizQuestions(area, questions, bonusPerQuestion, rec, pointsLineE
     saveState();
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitted';
-    area.appendChild(el('div',{class:'quiz-result'}, `You got ${correctCount} of ${questions.length} correct — +${bonus} bonus point${bonus===1?'':'s'}!`));
+    area.appendChild(el('div',{class:'quiz-result'}, `You got ${correctCount} of ${shuffled.length} correct — +${bonus} bonus point${bonus===1?'':'s'}!`));
     if(pointsLineEl) pointsLineEl.textContent = `Points earned this case: ${rec.pointsAwarded} + ${bonus} quiz bonus`;
     const hudScoreEl = $('#hudScore');
     if(hudScoreEl) hudScoreEl.textContent = 'Points: ' + state.score;
@@ -1398,7 +1435,9 @@ function renderCase(container){
     dblock.appendChild(dots);
     dblock.appendChild(el('div',{class:'decision-prompt'}, d.prompt));
     const opts = el('div',{class:'options'});
-    d.options.forEach(opt=>{
+    const order = getOptionOrder(c.id, state.decisionStep, d.options.length);
+    order.forEach(optIdx=>{
+      const opt = d.options[optIdx];
       const b = el('button',{class:'option-btn'}, opt.text);
       b.onclick = ()=>{
         state.decisionScoreThisCase += opt.points;
