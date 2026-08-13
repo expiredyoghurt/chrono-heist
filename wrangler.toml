@@ -1,0 +1,28 @@
+name = "chrono-heist"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+
+# Serves everything in /public (index.html, etc.) as static files.
+# Requests to /api/* are handled by the fetch() logic in worker.js instead —
+# see the routing check at the top of the fetch handler.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# ── Bindings NOT declared here on purpose ───────────────────────────────
+# KV namespaces (LEADERBOARD_KV, MAP_KV), the Workers AI binding (AI), and
+# the MAP_ADMIN_KEY secret are all added later through the Cloudflare
+# dashboard (Worker → Settings → Bindings / Variables), entirely in the
+# browser — no need to hand-edit namespace IDs into this file, and no
+# terminal/wrangler CLI required. See README.md for the full walkthrough.
+#
+# If you later prefer to manage bindings via this file instead (e.g. for
+# CLI-based deploys), the equivalent would look like:
+#
+# kv_namespaces = [
+#   { binding = "LEADERBOARD_KV", id = "YOUR_LEADERBOARD_KV_ID" },
+#   { binding = "MAP_KV", id = "YOUR_MAP_KV_ID" }
+# ]
+#
+# [ai]
+# binding = "AI"
