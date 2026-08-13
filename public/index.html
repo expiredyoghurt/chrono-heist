@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chrono-Heist: The Anachronist Files</title>
+<title>Chrono Heist: The Anachronist Files</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Cinzel:wght@500;600;700;800&family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -1279,7 +1279,11 @@ function renderArchivistPanel(c){
           question: q
         })
       });
-      if(!res.ok) throw new Error('bad response');
+      if(!res.ok){
+        const errBody = await res.json().catch(()=>({}));
+        console.error('Chrono Archivist /api/ask failed:', res.status, errBody.error || '(no error detail)');
+        throw new Error(errBody.error || ('HTTP ' + res.status));
+      }
       const data = await res.json();
       responseArea.innerHTML = '';
       responseArea.appendChild(el('div',{class:'archivist-answer'}, data.answer || 'The Archivist has nothing further to add on that.'));
@@ -1330,9 +1334,15 @@ function renderQuizPanel(c, rec, pointsLineEl){
             Number.isInteger(q.correctIndex) && q.correctIndex >= 0 && q.correctIndex <= 3
           );
           if(valid.length > 0) questions = valid;
+          else console.warn('Chrono Field Quiz: AI returned no valid questions, using fallback.', data.error || '');
+        } else {
+          console.warn('Chrono Field Quiz: AI returned no questions, using fallback.', data.error || '');
         }
+      } else {
+        const errBody = await res.json().catch(()=>({}));
+        console.error('Chrono Field Quiz /api/quiz failed:', res.status, errBody.error || '(no error detail)');
       }
-    }catch(e){ /* fall through to static fallback below */ }
+    }catch(e){ console.error('Chrono Field Quiz: request failed', e); /* fall through to static fallback below */ }
 
     if(!questions){
       questions = [c.quizFallback];

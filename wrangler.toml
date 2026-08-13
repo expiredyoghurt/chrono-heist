@@ -9,20 +9,29 @@ compatibility_date = "2024-09-23"
 directory = "./public"
 binding = "ASSETS"
 
-# ── Bindings NOT declared here on purpose ───────────────────────────────
-# KV namespaces (LEADERBOARD_KV, MAP_KV), the Workers AI binding (AI), and
-# the MAP_ADMIN_KEY secret are all added later through the Cloudflare
-# dashboard (Worker → Settings → Bindings / Variables), entirely in the
-# browser — no need to hand-edit namespace IDs into this file, and no
-# terminal/wrangler CLI required. See README.md for the full walkthrough.
+# ── KV + Workers AI bindings ─────────────────────────────────────────────
+# IMPORTANT: this Worker deploys via Git (Wrangler-based CI), which treats
+# this file as the full source of truth for bindings on every deploy. Any
+# binding added ONLY through the dashboard UI (rather than here) gets reset
+# on the next push or "Retry deployment" — that's a common cause of the AI
+# feature or leaderboard silently going dark after appearing to work.
 #
-# If you later prefer to manage bindings via this file instead (e.g. for
-# CLI-based deploys), the equivalent would look like:
-#
-# kv_namespaces = [
-#   { binding = "LEADERBOARD_KV", id = "YOUR_LEADERBOARD_KV_ID" },
-#   { binding = "MAP_KV", id = "YOUR_MAP_KV_ID" }
-# ]
-#
-# [ai]
-# binding = "AI"
+# Fill in the two KV namespace IDs below (get them from Cloudflare dashboard
+# → Storage & Databases → KV → click into each namespace → copy its ID),
+# then commit this file via GitHub's web editor. The [ai] binding needs no
+# ID — Workers AI is available on your account by default.
+kv_namespaces = [
+  { binding = "LEADERBOARD_KV", id = "b3cd6650681c41f8896b1ead3b28c874" },
+  { binding = "MAP_KV", id = "734e92b9f8e34d07804f4dc4b2df74df" }
+]
+
+[ai]
+binding = "AI"
+
+# ── MAP_ADMIN_KEY ─────────────────────────────────────────────────────────
+# This ONE stays out of the file and is set as a Secret via the dashboard
+# (Worker → Settings → Variables and Secrets → Add → type "Secret"), or via
+# `wrangler secret put MAP_ADMIN_KEY` if you're using the CLI. Unlike plain
+# bindings, Secrets are stored independently of this file and DO persist
+# across Git-triggered redeploys, so this one is safe to manage via the
+# dashboard alone.

@@ -90,26 +90,31 @@ names* you set in Part 4 are what matter.)
 
 ### Part 4 — Reconnecting the AI-powered backend features
 
-The Worker is live, but the leaderboard, map, and both AI features need
-their bindings connected — done entirely via dashboard UI, no file
-editing required:
+**Important:** this Worker deploys via Git (Wrangler-based CI), which means
+`wrangler.toml` — not the dashboard — is the source of truth for bindings
+on every deploy. Adding `LEADERBOARD_KV`, `MAP_KV`, or `AI` *only* through
+the dashboard UI will appear to work until the next push or "Retry
+deployment," at which point Wrangler resets bindings to whatever this file
+declares and your dashboard-added ones vanish. That's the #1 cause of the
+AI features or leaderboard going quiet after seeming to work. So:
 
-1. Open your Worker in the dashboard → **Settings** → **Bindings**
-   (sometimes shown as **Variables and Bindings**).
-2. **Add binding** → **KV namespace**:
-   - Variable name: `LEADERBOARD_KV` (must match exactly)
-   - Namespace: `chrono-leaderboard`
-3. **Add binding** → **KV namespace** again:
-   - Variable name: `MAP_KV` (must match exactly)
-   - Namespace: `chrono-map`
-4. **Add binding** → **Workers AI**:
-   - Variable name: `AI` (must match exactly)
-5. **Add binding** → **Environment Variable** (or **Secret**):
-   - Variable name: `MAP_ADMIN_KEY`
-   - Value: any password-like string you make up — enable **Encrypt** if
-     offered. You'll reuse this value once in Part 5.
-6. Save, then go to **Deployments** and **Retry deployment** (or push any
-   small commit to GitHub) so the new bindings take effect.
+1. In the Cloudflare dashboard, go to each KV namespace you created in
+   Part 2 (`chrono-leaderboard`, `chrono-map`) and copy its **ID** (shown
+   on the namespace's own page).
+2. On GitHub, open `wrangler.toml` in your repo and click the ✏️ (edit)
+   icon.
+3. Replace `REPLACE_WITH_YOUR_LEADERBOARD_KV_ID` and
+   `REPLACE_WITH_YOUR_MAP_KV_ID` with the two IDs from step 1. The `[ai]`
+   binding needs no ID — leave it as-is.
+4. Commit the change directly to your main branch. This triggers an
+   automatic redeploy with the bindings now baked into the build, so they
+   persist across every future deploy.
+5. Separately, set the one binding that's *safe* to manage via dashboard
+   alone: go to your Worker → **Settings** → **Variables and Secrets** →
+   **Add** → type **Secret** → name it `MAP_ADMIN_KEY` → set any
+   password-like value. Secrets are stored independently of `wrangler.toml`
+   and do persist across Git-triggered redeploys, unlike plain bindings.
+6. Confirm the deploy succeeded under the **Deployments** tab.
 
 ### Part 5 — Seed the map data (one click, in-app)
 
@@ -128,15 +133,29 @@ account.
 
 ## Troubleshooting
 
+The Archivist and Field Quiz now log the actual failure to the browser
+console (F12 → Console tab) instead of only showing the generic in-game
+"scrambled by the timestream" message — check there first; it'll show the
+real HTTP status and error text from the Worker.
+
 - **"The Archivist's connection is scrambled" / quiz always falls back to
-  the static question:** confirm the Workers AI binding's variable name is
-  exactly `AI` (Settings → Bindings), then retry the deployment.
-- **Leaderboard doesn't persist:** confirm both KV binding variable names
-  are exactly `LEADERBOARD_KV` and `MAP_KV` — bindings are case-sensitive
-  and a typo here is the most common issue.
+  the static question:** open the browser console and look for a
+  `Chrono Archivist` or `Chrono Field Quiz` error log.
+  - `"Workers AI binding not configured"` → the `AI` binding isn't active.
+    Check it's declared under `[ai]` in `wrangler.toml` (not only added via
+    dashboard — see Part 4) and that the deploy succeeded afterward.
+  - Any other error → likely a transient Workers AI issue; try again.
+- **This appeared to work, then stopped:** almost always means a binding
+  was added only via the dashboard and got reset by a later Git-triggered
+  deploy. Re-check `wrangler.toml` has real KV IDs and the `[ai]` block —
+  see Part 4.
+- **Leaderboard doesn't persist:** same root cause — confirm
+  `LEADERBOARD_KV` and `MAP_KV` have real namespace IDs in `wrangler.toml`
+  (not placeholder text), and that binding *names* are spelled exactly
+  right (case-sensitive).
 - **Map still shows the offline atlas view:** re-check the `MAP_ADMIN_KEY`
-  value matches exactly between Settings → Bindings/Variables and what you
-  typed into the in-app admin panel, then retry **Seed Map Data**.
+  value matches exactly between Settings → Variables and Secrets and what
+  you typed into the in-app admin panel, then retry **Seed Map Data**.
 - **A new commit to GitHub doesn't show up on the live site:** check the
   **Deployments** tab in the Cloudflare dashboard — Git-connected Workers
   redeploy automatically on push, but you can also trigger **Retry
