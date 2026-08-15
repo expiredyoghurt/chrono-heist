@@ -1,0 +1,58 @@
+name = "chrono-heist"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+
+# Serves everything in /public (index.html, etc.) as static files.
+# Requests to /api/* are handled by the fetch() logic in worker.js instead —
+# see the routing check at the top of the fetch handler.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# ── KV + Workers AI bindings ─────────────────────────────────────────────
+# IMPORTANT: this Worker deploys via Git (Wrangler-based CI), which treats
+# this file as the full source of truth for bindings on every deploy. Any
+# binding added ONLY through the dashboard UI (rather than here) gets reset
+# on the next push or "Retry deployment" — that's a common cause of the AI
+# feature or leaderboard silently going dark after appearing to work.
+#
+# Fill in the two KV namespace IDs below (get them from Cloudflare dashboard
+# → Storage & Databases → KV → click into each namespace → copy its ID),
+# then commit this file via GitHub's web editor. The [ai] binding needs no
+# ID — Workers AI is available on your account by default, and it's used
+# both as a standalone backend (if you don't set up Grok) and as an
+# automatic fallback if Grok is configured but a request to it fails.
+kv_namespaces = [
+  { binding = "LEADERBOARD_KV", id = "REPLACE_WITH_YOUR_LEADERBOARD_KV_ID" },
+  { binding = "MAP_KV", id = "REPLACE_WITH_YOUR_MAP_KV_ID" }
+]
+
+[ai]
+binding = "AI"
+
+# ── Secrets (NOT declared here — see README.md Part 4) ──────────────────
+# Two more values are needed, both set as Secrets via the dashboard
+# (Worker → Settings → Variables and Secrets → Add → type "Secret"), never
+# hand-edited into this file:
+#
+#   MAP_ADMIN_KEY   — protects the one-time "Seed Map Data" admin action.
+#   XAI_API_KEY     — your Grok (xAI) API key. OPTIONAL: if set, the two AI
+#                      features (Ask the Chrono Archivist, Field Quiz) try
+#                      Grok FIRST, then automatically fall back to Workers
+#                      AI if Grok fails or isn't configured. If you skip
+#                      this, the game just uses Workers AI (env.AI above)
+#                      as its only backend — nothing breaks either way.
+#
+# One more OPTIONAL plain (non-secret) variable can also be added the same
+# way, using "Text" instead of "Secret":
+#
+#   XAI_MODEL       — which Grok model to call (defaults to "grok-4-fast"
+#                      in worker.js if unset). xAI updates model names
+#                      periodically — check https://docs.x.ai if Grok
+#                      requests start failing with a "model not found"
+#                      style error, and update this variable rather than
+#                      editing code.
+#
+# Like MAP_ADMIN_KEY, Secrets and Variables set via the dashboard DO
+# persist across Git-triggered redeploys (unlike plain bindings above),
+# so this is genuinely a one-time setup step.
