@@ -23,8 +23,8 @@ binding = "ASSETS"
 # both as a standalone backend (if you don't set up Grok) and as an
 # automatic fallback if Grok is configured but a request to it fails.
 kv_namespaces = [
-  { binding = "LEADERBOARD_KV", id = "REPLACE_WITH_YOUR_LEADERBOARD_KV_ID" },
-  { binding = "MAP_KV", id = "REPLACE_WITH_YOUR_MAP_KV_ID" }
+  { binding = "LEADERBOARD_KV", id = "b3cd6650681c41f8896b1ead3b28c874" },
+  { binding = "MAP_KV", id = "734e92b9f8e34d07804f4dc4b2df74df" }
 ]
 
 [ai]
