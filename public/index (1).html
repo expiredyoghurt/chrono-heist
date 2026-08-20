@@ -1,0 +1,2197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chrono Heist: The Anachronist Files</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Cinzel:wght@500;600;700;800&family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+<style>
+:root{
+  --paper:#e6d3a0;
+  --paper-dark:#c8a15f;
+  --card:#f3e6c2;
+  --ink:#2c1c0d;
+  --ink-soft:#5a4326;
+  --brass:#9a6d24;
+  --brass-light:#dcae35;
+  --leather:#5c3418;
+  --leather-dark:#3a2110;
+  --red-string:#8f2a1c;
+  --pin-green:#3f6b3a;
+  --pin-red:#8f2a1c;
+  --navy:#2a1d10;
+  --navy-light:#3d2a17;
+  --ocean:#5c7d6c;
+  --land:#d8bd82;
+  --shadow: 0 8px 20px rgba(20,10,2,0.38);
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:'Spectral', Georgia, serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(255,240,200,0.35), transparent 55%),
+    radial-gradient(ellipse at 90% 100%, rgba(90,50,10,0.18), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(90,60,20,0.035) 0px, rgba(90,60,20,0.035) 1px, transparent 1px, transparent 3px),
+    var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+}
+.paper-texture{
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px);
+}
+h1,h2,h3,.display{
+  font-family:'Cinzel', 'Special Elite', serif;
+  letter-spacing:0.5px;
+  font-weight:700;
+}
+.mono{font-family:'Courier Prime','Courier New',monospace;}
+.hidden{display:none !important;}
+button{
+  font-family:'Special Elite','Courier New',monospace;
+  cursor:pointer;
+  border:2px solid var(--leather-dark);
+  background:linear-gradient(180deg, var(--brass-light), var(--brass) 55%, #7a5620 100%);
+  color:#2c1a06;
+  padding:12px 20px;
+  border-radius:4px;
+  font-size:0.95rem;
+  letter-spacing:0.7px;
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -2px 3px rgba(0,0,0,0.25);
+  transition:transform .12s ease, filter .12s ease;
+  text-shadow:0 1px 0 rgba(255,255,255,0.25);
+}
+button:hover{filter:brightness(1.08); transform:translateY(-1px);}
+button:active{transform:translateY(0); filter:brightness(0.97);}
+button:focus-visible, a:focus-visible, input:focus-visible{
+  outline:3px solid var(--brass-light);
+  outline-offset:2px;
+}
+button.secondary{background:transparent; background-image:none; color:var(--ink); border:2px solid var(--brass); box-shadow:none; text-shadow:none;}
+button.secondary:hover{background:rgba(154,109,36,0.14); filter:none;}
+button.danger{background:linear-gradient(180deg, #b5432f, var(--red-string) 60%, #5e1a10 100%); color:#fff0e8; text-shadow:0 1px 1px rgba(0,0,0,0.4);}
+input[type=text], input[type=password]{
+  font-family:'Courier Prime',monospace;
+  padding:10px 12px;
+  border:2px solid var(--brass);
+  border-radius:3px;
+  background:var(--card);
+  color:var(--ink);
+  font-size:1rem;
+}
+.screen{
+  min-height:100vh;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:32px 16px 60px;
+}
+.container{width:100%; max-width:900px;}
+.stamp{
+  display:inline-block;
+  border:3px double var(--red-string);
+  color:var(--red-string);
+  padding:5px 12px;
+  transform:rotate(-4deg);
+  font-family:'Special Elite',monospace;
+  font-size:0.78rem;
+  border-radius:3px;
+  opacity:0.85;
+  letter-spacing:0.5px;
+}
+
+/* ---------- LANDING ---------- */
+#landing .container{text-align:center; padding-top:5vh;}
+.title-block{margin-bottom:8px; position:relative; padding:18px 10px 6px;}
+.title-block::before{
+  content:"";
+  position:absolute; inset:0; margin:auto; width:280px; height:280px;
+  max-width:90vw; max-height:90vw;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%239a6d24' stroke-width='0.6'%3E%3Ccircle cx='50' cy='50' r='46'/%3E%3Ccircle cx='50' cy='50' r='38'/%3E%3Cg stroke-width='0.4'%3E%3Cline x1='50' y1='4' x2='50' y2='96'/%3E%3Cline x1='4' y1='50' x2='96' y2='50'/%3E%3Cline x1='16' y1='16' x2='84' y2='84'/%3E%3Cline x1='84' y1='16' x2='16' y2='84'/%3E%3C/g%3E%3Cpath d='M50 8 L56 50 L50 92 L44 50 Z' fill='%239a6d24' stroke='none' opacity='0.55'/%3E%3Cpath d='M8 50 L50 44 L92 50 L50 56 Z' fill='%239a6d24' stroke='none' opacity='0.3'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:center; background-size:contain;
+  opacity:0.28; z-index:0; pointer-events:none;
+}
+.title-block h1{
+  font-size:3rem; margin:0 0 6px; position:relative; z-index:1;
+  background:linear-gradient(180deg, #f0d27a, var(--brass) 70%, #7a5620);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  text-shadow:0 2px 0 rgba(0,0,0,0.15);
+  letter-spacing:2px;
+}
+.title-block .subtitle{
+  font-size:1rem; color:var(--red-string); font-style:italic; position:relative; z-index:1;
+  font-family:'Special Elite',monospace; letter-spacing:1px;
+}
+.title-divider{
+  width:220px; max-width:70vw; height:2px; margin:14px auto 0;
+  background:repeating-linear-gradient(90deg, var(--brass) 0 8px, transparent 8px 14px);
+  position:relative; z-index:1;
+}
+.folder{
+  background:var(--card);
+  border:2px solid var(--brass);
+  border-radius:4px;
+  box-shadow:var(--shadow), inset 0 0 0 5px rgba(154,109,36,0.08);
+  padding:30px 26px 26px;
+  margin-top:30px;
+  position:relative;
+}
+.folder::before{
+  content:"CLASSIFIED — CHRONO AGENCY DOSSIER";
+  position:absolute;
+  top:-14px; left:20px;
+  background:var(--navy);
+  color:var(--paper);
+  font-family:'Courier Prime',monospace;
+  font-size:0.68rem;
+  letter-spacing:1.6px;
+  padding:5px 10px;
+  border-radius:2px;
+  box-shadow:0 2px 4px rgba(0,0,0,0.35);
+}
+.folder::after{
+  content:"";
+  position:absolute; top:8px; right:10px; width:14px; height:14px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #f0d27a, var(--brass) 60%, #5c3c14);
+  box-shadow:8px 0 0 -1px var(--brass), 0 0 0 1px rgba(0,0,0,0.2);
+}
+.name-row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px;}
+.name-row input{flex:1; min-width:220px;}
+.intro-text{color:var(--ink-soft); line-height:1.65; text-align:left; margin-top:6px;}
+.landing-links{margin-top:22px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+
+/* ---------- MAP ---------- */
+.map-wrap{
+  background:var(--navy);
+  border-radius:6px;
+  box-shadow:var(--shadow);
+  padding:14px;
+  position:relative;
+  overflow:hidden;
+  border:3px solid var(--leather);
+}
+.map-wrap::after{
+  content:"";
+  position:absolute; bottom:6px; right:6px; width:54px; height:54px; pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23dcae35' stroke-width='2'%3E%3Ccircle cx='50' cy='50' r='42'/%3E%3Cline x1='50' y1='10' x2='50' y2='90'/%3E%3Cline x1='10' y1='50' x2='90' y2='50'/%3E%3C/g%3E%3Cpath d='M50 14 L58 50 L50 86 L42 50 Z' fill='%23dcae35' opacity='0.7'/%3E%3Ctext x='50' y='9' text-anchor='middle' fill='%23dcae35' font-size='9' font-family='serif'%3EN%3C/text%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-size:contain; opacity:0.55;
+}
+.map-wrap .map-caption{color:var(--paper); font-family:'Courier Prime',monospace; font-size:0.75rem; opacity:0.75; padding:0 4px 8px;}
+svg#worldmap{width:100%; height:auto; display:block;}
+.pin{cursor:default;}
+.pin circle.head{filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5));}
+.pin text{
+  font-family:'Courier Prime',monospace;
+  font-size:11px;
+  fill:var(--paper);
+}
+.pin text.year{
+  font-size:9.5px;
+  fill:var(--brass-light);
+}
+.pin text.label-bg{
+  fill:var(--navy);
+  stroke:var(--navy);
+  stroke-width:3px;
+  paint-order:stroke;
+  opacity:0.85;
+}
+.map-loading{color:var(--paper); font-family:'Courier Prime',monospace; font-size:0.8rem; opacity:0.6; padding:30px; text-align:center;}
+.legend{display:flex; gap:18px; margin-top:10px; font-family:'Courier Prime',monospace; font-size:0.75rem; color:var(--ink-soft); flex-wrap:wrap;}
+.legend span{display:inline-flex; align-items:center; gap:6px;}
+.legend .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+/* ---------- HUD ---------- */
+.hud{
+  display:flex; justify-content:space-between; align-items:center;
+  background:linear-gradient(180deg, var(--navy-light), var(--navy)); color:var(--paper);
+  padding:10px 16px; border-radius:5px; margin-bottom:18px;
+  font-family:'Courier Prime',monospace; font-size:0.85rem;
+  box-shadow:var(--shadow);
+  flex-wrap:wrap; gap:8px;
+  border:2px solid var(--leather);
+  border-top:3px solid var(--brass);
+}
+.hud .agent{font-weight:700; color:var(--brass-light); font-family:'Cinzel',serif; letter-spacing:0.5px;}
+.hud-actions{display:flex; gap:8px;}
+.hud-actions button{padding:6px 12px; font-size:0.72rem;}
+.hud-actions button.secondary{color:var(--brass-light); border-color:var(--brass-light); text-shadow:0 1px 2px rgba(0,0,0,0.5);}
+.hud-actions button.secondary:hover{background:rgba(220,174,53,0.18);}
+
+/* ---------- CASE FILE ---------- */
+.case-card{
+  background:var(--card);
+  border-radius:5px;
+  box-shadow:var(--shadow);
+  padding:26px;
+  margin-bottom:20px;
+  position:relative;
+  border:1px solid var(--paper-dark);
+  border-left:7px solid var(--brass);
+}
+.case-card::before{
+  content:"";
+  position:absolute; top:10px; right:12px; width:10px; height:10px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #f0d27a, var(--brass) 65%, #5c3c14);
+  box-shadow:0 1px 2px rgba(0,0,0,0.4);
+}
+.case-header{display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap;}
+.case-header h2{margin:0 0 4px; font-size:1.35rem; color:var(--leather-dark);}
+.case-meta{color:var(--ink-soft); font-family:'Courier Prime',monospace; font-size:0.8rem;}
+.case-body{line-height:1.7; margin-top:14px; white-space:pre-line;}
+.decision-block{margin-top:20px; border-top:2px dashed var(--paper-dark); padding-top:16px;}
+.decision-prompt{font-weight:600; margin-bottom:12px;}
+.decision-hint{font-style:italic; font-size:0.82rem; opacity:0.75; margin:-6px 0 12px;}
+.order-note{font-size:0.7rem; opacity:0.55; margin-top:10px; font-style:italic;}
+.options{display:flex; flex-direction:column; gap:10px;}
+.option-btn{
+  text-align:left;
+  background:var(--paper);
+  color:var(--ink);
+  border:2px solid var(--paper-dark);
+  box-shadow:none;
+  padding:12px 14px;
+  border-radius:4px;
+  font-family:'Spectral',serif;
+  font-size:0.98rem;
+  text-shadow:none;
+}
+.option-btn:hover{border-color:var(--brass); background:#fff3d6; filter:none;}
+.progress-dots{display:flex; gap:6px; margin:10px 0 0;}
+.progress-dots span{width:9px;height:9px;border-radius:50%;background:var(--paper-dark);display:inline-block;}
+.progress-dots span.filled{background:var(--brass);}
+
+.resolution-badge{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:120px; height:120px; border-radius:50%;
+  font-family:'Cinzel',serif; font-weight:700;
+  font-size:0.85rem; margin-bottom:14px; letter-spacing:0.5px; text-align:center;
+  border:3px double rgba(255,255,255,0.55);
+  box-shadow:0 4px 10px rgba(0,0,0,0.4), inset 0 0 0 6px rgba(0,0,0,0.08);
+  transform:rotate(-6deg);
+  text-transform:uppercase;
+  line-height:1.2;
+  padding:8px;
+}
+.resolution-badge.success{background:radial-gradient(circle at 35% 30%, #5c8f52, var(--pin-green) 70%); color:#f2fbe8;}
+.resolution-badge.fail{background:radial-gradient(circle at 35% 30%, #b0503c, var(--pin-red) 70%); color:#fff0e8;}
+.resolution-badge.passable{background:radial-gradient(circle at 35% 30%, #c9a13f, var(--brass) 70%); color:#2c1a06;}
+.resolution-badge.critical{background:radial-gradient(circle at 35% 30%, #6b1a10, #3a0d08 70%); color:#ffd9c9; border-color:rgba(255,120,90,0.55);}
+
+.legacy-box{
+  background:var(--paper);
+  border:1px dashed var(--brass);
+  border-radius:5px;
+  padding:16px 18px;
+  margin-top:16px;
+  line-height:1.7;
+}
+.legacy-box h3{margin:0 0 8px; font-size:1rem; color:var(--leather-dark);}
+.legacy-box .modern{margin-top:10px; padding-top:10px; border-top:1px dotted var(--paper-dark);}
+.legacy-box summary{cursor:pointer; font-weight:600; font-size:1rem; color:var(--leather-dark); list-style:none;}
+.legacy-box summary::-webkit-details-marker{display:none;}
+.legacy-box summary::after{content:' (tap to expand)'; font-weight:400; font-size:0.78rem; opacity:0.6;}
+.legacy-box[open] summary::after{content:' (tap to collapse)';}
+
+/* ---------- ASK THE CHRONO ARCHIVIST ---------- */
+.archivist-box{
+  background:linear-gradient(180deg, var(--navy-light), var(--navy));
+  border:2px solid var(--brass);
+  border-radius:5px;
+  padding:16px 18px;
+  margin-top:16px;
+  color:var(--paper);
+}
+.archivist-box h3{margin:0 0 6px; color:var(--brass-light); font-size:1rem;}
+.archivist-intro{margin:0 0 12px; font-size:0.85rem; color:#d9c9a0; line-height:1.5;}
+.archivist-row{display:flex; gap:8px; flex-wrap:wrap;}
+.archivist-row input{flex:1; min-width:180px;}
+.archivist-row button{padding:10px 16px;}
+.archivist-response{margin-top:12px;}
+.archivist-loading{font-family:'Courier Prime',monospace; font-size:0.8rem; opacity:0.7; font-style:italic;}
+.archivist-answer{
+  font-family:'Spectral',serif; font-size:0.92rem; line-height:1.6;
+  background:rgba(0,0,0,0.18); border-left:3px solid var(--brass-light);
+  padding:10px 14px; border-radius:2px; color:#f2e6c8;
+}
+.archivist-answer.archivist-error{border-left-color:var(--red-string); font-style:italic;}
+
+/* ---------- CHRONO FIELD QUIZ ---------- */
+.quiz-box{
+  background:var(--card);
+  border:1px dashed var(--brass);
+  border-radius:5px;
+  padding:16px 18px;
+  margin-top:14px;
+}
+.quiz-box h3{margin:0 0 6px; color:var(--leather-dark); font-size:1rem;}
+.quiz-question{margin-top:14px;}
+.quiz-prompt{font-weight:600; margin-bottom:8px;}
+.quiz-options{display:flex; flex-direction:column; gap:8px;}
+.quiz-option-btn{
+  text-align:left; background:var(--paper); color:var(--ink);
+  border:2px solid var(--paper-dark); box-shadow:none; text-shadow:none;
+  padding:9px 12px; border-radius:4px; font-family:'Spectral',serif; font-size:0.9rem;
+}
+.quiz-option-btn:hover{border-color:var(--brass); filter:none;}
+.quiz-option-btn.selected{border-color:var(--brass); background:#fff3d6;}
+.quiz-option-btn.correct{border-color:var(--pin-green); background:#e3f0e0; color:#2b4a27;}
+.quiz-option-btn.incorrect{border-color:var(--pin-red); background:#f5ded9; color:#6b2318;}
+.quiz-result{margin-top:12px; font-family:'Cinzel',serif; font-weight:700; color:var(--leather-dark);}
+
+.artifact-toast{
+  display:flex; align-items:center; gap:12px;
+  background:linear-gradient(180deg, var(--navy-light), var(--navy)); color:var(--paper);
+  padding:12px 16px; border-radius:6px; margin-top:14px;
+  font-family:'Courier Prime',monospace; font-size:0.85rem;
+  border:2px solid var(--brass);
+}
+.artifact-toast .icon{font-size:1.6rem;}
+
+/* ---------- INTERSTITIAL ---------- */
+.interstitial{
+  background:linear-gradient(180deg, var(--navy-light), var(--navy));
+  color:var(--paper);
+  border-radius:6px;
+  padding:30px 28px;
+  box-shadow:var(--shadow);
+  text-align:center;
+  border:2px solid var(--leather);
+  border-top:4px solid var(--brass);
+}
+.interstitial h2{color:var(--brass-light); margin-top:0;}
+.interstitial p{line-height:1.7; color:#e6d9b8; text-align:left;}
+
+/* ---------- EVIDENCE BAG ---------- */
+.evidence-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:16px; margin-top:14px;}
+.evidence-item{
+  background:var(--paper); border:1px solid var(--paper-dark); border-radius:3px;
+  padding:14px 8px 10px; text-align:center; font-family:'Courier Prime',monospace; font-size:0.72rem;
+  position:relative; box-shadow:0 3px 6px rgba(0,0,0,0.18);
+}
+.evidence-item::before{
+  content:"";
+  position:absolute; top:-7px; left:50%; transform:translateX(-50%) rotate(-3deg);
+  width:34px; height:12px; background:rgba(220,174,53,0.55);
+  border:1px solid rgba(154,109,36,0.5);
+}
+.evidence-item .icon{font-size:1.8rem; display:block; margin-bottom:6px;}
+.evidence-empty{color:var(--ink-soft); font-style:italic; font-family:'Spectral',serif;}
+
+/* ---------- LEADERBOARD ---------- */
+table.leaderboard{width:100%; border-collapse:collapse; margin-top:14px; font-family:'Courier Prime',monospace; font-size:0.85rem;}
+table.leaderboard th, table.leaderboard td{padding:8px 10px; border-bottom:1px solid var(--paper-dark); text-align:left;}
+table.leaderboard th{background:var(--navy); color:var(--brass-light); font-family:'Cinzel',serif; letter-spacing:0.5px;}
+table.leaderboard tr:nth-child(even){background:rgba(90,60,20,0.05);}
+table.leaderboard td:first-child, table.leaderboard th:first-child{border-left:3px solid var(--red-string);}
+table.leaderboard td.num{text-align:right;}
+
+/* ---------- MODAL ---------- */
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(20,10,4,0.7);
+  display:flex; align-items:center; justify-content:center; z-index:50; padding:16px;
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+}
+.modal{
+  background:var(--card); border-radius:6px; padding:26px; max-width:420px; width:100%;
+  box-shadow:var(--shadow);
+  border:2px solid var(--brass);
+  outline:6px solid var(--navy);
+  outline-offset:-14px;
+  max-height:calc(100vh - 32px); overflow-y:auto; -webkit-overflow-scrolling:touch;
+  margin:auto;
+}
+body.modal-open{overflow:hidden; touch-action:none;}
+.modal h3{margin-top:0; color:var(--leather-dark);}
+.modal-actions{display:flex; gap:10px; margin-top:16px; justify-content:flex-end;}
+.error-text{color:var(--red-string); font-size:0.85rem; font-family:'Courier Prime',monospace; margin-top:6px; min-height:1.2em;}
+
+/* ---------- FOOTER NAV ---------- */
+.nav-row{display:flex; justify-content:space-between; margin-top:20px; gap:10px; flex-wrap:wrap;}
+
+@media (max-width: 560px){
+  .title-block h1{font-size:2.1rem;}
+  .case-card{padding:18px;}
+  .resolution-badge{width:96px; height:96px; font-size:0.72rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LANDING ============ -->
+<div class="screen" id="landing">
+  <div class="container">
+    <div class="title-block">
+      <h1>Chrono Heist</h1>
+      <div class="subtitle">The Anachronist Files</div>
+      <div class="title-divider"></div>
+    </div>
+    <div class="folder">
+      <p class="intro-text">
+        History has been tampered with. Someone calling themselves <strong>The Anachronist</strong> is
+        raiding the timeline — stealing legacy artifacts from the past, and dropping objects that
+        don't belong into eras that never should have seen them. The Chrono Agency needs a new field
+        agent to chase the trail across ten civilizations. Every case you crack — or don't — teaches
+        you something about how that world shaped the one you live in now.
+      </p>
+      <div class="name-row">
+        <input type="text" id="agentNameInput" placeholder="Enter your agent name" autocomplete="off">
+        <button id="beginBtn">Begin Assignment</button>
+      </div>
+      <div class="error-text" id="landingError"></div>
+    </div>
+    <div class="landing-links">
+      <button class="secondary" id="viewLeaderboardBtn">View Leaderboard</button>
+      <button class="secondary" id="howToPlayBtn">How To Play</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HOW TO PLAY MODAL ============ -->
+<div class="modal-backdrop hidden" id="howToModal">
+  <div class="modal">
+    <h3>Field Manual</h3>
+    <p style="line-height:1.6">
+      Travel to each era on the map and investigate the case. Each case has three decisions —
+      choose carefully, but don't worry about "losing": whether you crack the case or the trail
+      goes cold, you'll always recover the full case file, learn the civilization's story, and see
+      how its legacy lives on today. Successful cases add the recovered artifact to your
+      <strong>Evidence Bag</strong> and earn full points. Missed cases still earn partial points.
+      Your name, score, and evidence bag are saved to the leaderboard.
+    </p>
+    <div class="modal-actions">
+      <button id="closeHowTo">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ GAME SCREEN ============ -->
+<div class="screen hidden" id="game">
+  <div class="container">
+    <div class="hud">
+      <div><span class="agent" id="hudAgentName"></span> — Chrono Agency Field File</div>
+      <div class="hud-actions">
+        <span id="hudScore">Points: 0</span>
+        <span id="hudProgress" class="case-meta" style="align-self:center"></span>
+        <button class="secondary" id="hudMapBtn">World Map</button>
+        <button class="secondary" id="hudEvidenceBtn">Evidence Bag</button>
+        <button class="secondary" id="hudLeaderboardBtn">Leaderboard</button>
+      </div>
+    </div>
+    <div id="mapSection"></div>
+    <div id="caseSection"></div>
+  </div>
+</div>
+
+<!-- ============ EVIDENCE MODAL ============ -->
+<div class="modal-backdrop hidden" id="evidenceModal">
+  <div class="modal" style="max-width:560px">
+    <h3>Evidence Bag</h3>
+    <div class="evidence-grid" id="evidenceGrid"></div>
+    <div class="modal-actions"><button id="closeEvidence">Close</button></div>
+  </div>
+</div>
+
+<!-- ============ LEADERBOARD MODAL ============ -->
+<div class="modal-backdrop hidden" id="leaderboardModal">
+  <div class="modal" style="max-width:640px">
+    <h3>Chrono Agency Leaderboard</h3>
+    <div id="leaderboardBody" class="mono" style="font-size:0.85rem; opacity:0.7;">Loading...</div>
+    <div class="modal-actions"><button id="closeLeaderboard">Close</button></div>
+  </div>
+</div>
+
+<!-- ============ TEACHER PASSWORD MODAL ============ -->
+<div class="modal-backdrop hidden" id="teacherPwModal">
+  <div class="modal">
+    <h3>Restricted Access</h3>
+    <p>Agent identity <strong>Palpatine</strong> requires authorization code.</p>
+    <input type="password" id="teacherPwInput" placeholder="Authorization code" style="width:100%">
+    <div class="error-text" id="teacherPwError"></div>
+    <div class="modal-actions">
+      <button class="secondary" id="cancelTeacherPw">Cancel</button>
+      <button id="submitTeacherPw">Authorize</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TEACHER TOOLS SCREEN ============ -->
+<div class="screen hidden" id="teacherScreen">
+  <div class="container">
+    <h1>Teacher Tools</h1>
+    <p class="intro-text">Edit or remove leaderboard entries. Changes save immediately.</p>
+    <div id="teacherTableWrap"></div>
+    <div class="nav-row">
+      <button class="secondary" id="teacherBackBtn">Back to Landing</button>
+      <button class="danger" id="teacherClearAllBtn">Clear Entire Leaderboard</button>
+    </div>
+
+    <div class="folder" style="margin-top:34px; text-align:left;">
+      <h3 style="margin-top:0">Class Settings</h3>
+      <p class="intro-text">
+        Controls apply to every student playing this deployment. Saved centrally
+        when a Worker/KV backend is connected, and locally in this browser otherwise.
+      </p>
+      <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+        <input type="checkbox" id="reviewModeToggle" style="width:auto;">
+        <span>Allow students to review a case again after resolving it (no score change)</span>
+      </label>
+      <div class="error-text" id="reviewModeStatus"></div>
+    </div>
+
+    <div class="folder" style="margin-top:34px; text-align:left;">
+      <h3 style="margin-top:0">Admin: Seed Map Data</h3>
+      <p class="intro-text">
+        One-time setup step, done entirely in this browser — no terminal needed.
+        This downloads the world coastline data and stores it in your own
+        <span class="mono">MAP_KV</span> namespace via the deployed Worker/Function,
+        so the situation map no longer depends on any third-party CDN.
+        You only need to do this once per deployment. Requires the
+        <span class="mono">MAP_ADMIN_KEY</span> you set in the Cloudflare dashboard.
+      </p>
+      <div class="name-row">
+        <input type="password" id="mapAdminKeyInput" placeholder="MAP_ADMIN_KEY">
+        <button id="seedMapBtn">Seed Map Data</button>
+      </div>
+      <div class="error-text" id="seedMapStatus"></div>
+    </div>
+
+    <div class="folder" style="margin-top:22px; text-align:left;">
+      <h3 style="margin-top:0">Admin: AI Backend Status</h3>
+      <p class="intro-text">
+        Checks which AI backend(s) are actually connected on the deployed site —
+        no API calls are made, this just reports which bindings/secrets the
+        Worker can currently see. Use this first if the Chrono Archivist or
+        Field Quiz aren't working.
+      </p>
+      <div class="name-row">
+        <button id="checkAiStatusBtn">Check AI Backend Status</button>
+      </div>
+      <div id="aiStatusResult" class="mono" style="margin-top:10px; font-size:0.85rem;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   CHRONO HEIST — game data & engine
+   ===================================================================== */
+
+const STORAGE_KEY = 'chronoHeistSave_v1';
+const LEADERBOARD_KEY = 'chronoHeistLeaderboard_v1';
+const SETTINGS_KEY = 'chronoHeistSettings_v1';
+const KV_ENDPOINT = '/api/leaderboard'; // Cloudflare Pages Function + KV, falls back to localStorage if unreachable
+const ASK_ENDPOINT = '/api/ask';   // Workers AI — "Ask the Chrono Archivist"
+const QUIZ_ENDPOINT = '/api/quiz'; // Workers AI — generated Field Quiz
+const SETTINGS_ENDPOINT = '/api/settings'; // Workers KV — class-wide settings (e.g. review mode), falls back to localStorage
+
+// ---------- CASE + INTERSTITIAL DATA ----------
+const CASES = [
+{
+  id:'indus', order:1, era:'c. 2500 BCE', location:'Mohenjo-daro, Indus Valley',
+  mapPin:{lat:27.3273, lon:68.1382},
+  title:'The Silent Seals of Mohenjo-daro',
+  icon:'🪔',
+  briefing:`You materialize on a sun-baked street in Mohenjo-daro, one of the great cities of the Indus Valley, laid out in the same precise grid pattern the Agency briefed you on. Word has already reached the local ward-keeper: a set of carved steatite seals, prized for their finely etched unicorn motifs and undeciphered script, have vanished from a merchant's house beside the Great Bath, the city's famous public bathing structure. In the empty display niche, someone has left behind a single seal cut from a dull grey metal that has no business existing in this century.
+
+The merchant's neighbors are just as unsettled as you are. Down the lane, the riverside marketplace is still buzzing with traders from as far as Gujarat and the Persian Gulf, any one of whom might have slipped through unnoticed during the crowded morning trade. Above the rooftops looms the citadel mound, where the city's granary stands — the same raised platform where administrators track incoming grain shipments using seals almost identical to the ones just stolen.
+
+Your Agency briefing flags three leads worth chasing immediately: the bathhouse and merchant's house themselves, the marketplace crowd, and the citadel granary's own seal records. Somewhere among fired bricks, drainage channels, and unicorn seals, the Anachronist has left a trail — if you know how this city's obsessively standardized world actually works.`,
+  tree:{
+    part1:{ prompt:'Where do you begin your investigation?', hint:'The building method itself is the giveaway here, if you know where to look for it.', options:[
+      {key:'A', text:'Examine the Great Bath and the merchant\'s house for construction and drainage clues'},
+      {key:'B', text:'Interview traders in the riverside marketplace, since gossip about unfamiliar faces spreads fast among stallkeepers'},
+      {key:'C', text:'Check the citadel granary\'s seal-based grain records, since administrators there track every shipment with obsessive precision'}
+    ]},
+    part2:{
+      A:{ prompt:'The dust you find at the scene doesn\'t match any local kiln. How do you follow up?', options:[
+        {key:'AA', text:'Compare the brick\'s dimensions to the standardized ratio used across the whole civilization'},
+        {key:'AB', text:'Ask a local artisan to identify the unfamiliar material, since craftsmen here pride themselves on knowing every stone and clay by feel'},
+        {key:'AC', text:'Assume the dust points to a nearby trader and publicly accuse him on the spot, before anyone can verify the claim'}
+      ]},
+      B:{ prompt:'A trader claims he saw a figure vanish near the citadel mound at dusk. How do you handle this lead?', options:[
+        {key:'BA', text:'Cross-check his story against the timing of the citadel\'s well-regulated street activity'},
+        {key:'BB', text:'Trust him immediately and rush to the citadel alone, certain speed matters more than a plan right now'},
+        {key:'BC', text:'Dismiss him as unreliable and return to the marketplace crowd, where a firmer lead seems more likely to turn up'}
+      ]},
+      C:{ prompt:'The granary\'s grain ledgers are extensive and confusing. How do you narrow the search?', options:[
+        {key:'CA', text:'Focus on entries stamped in the same unusual style as the stolen seals'},
+        {key:'CB', text:'Question the granary administrator directly about who\'s had access'},
+        {key:'CC', text:'Assume the thief wouldn\'t risk the heavily monitored granary and abandon this lead'}
+      ]}
+    },
+    leaves:{
+      AA:{tier:'ideal', points:30, text:`You match the odd brick dust to no kiln on Earth — a residue that couldn't exist for another four thousand years. Following the standardized-brick logic the Indus builders used across their entire civilization, you trace the thief's escape route past the drainage channels and up onto the citadel mound, recovering the stolen seals from a hidden compartment inside the granary itself.`},
+      AB:{tier:'passable', points:12, text:`The artisan can't identify the strange material, but he does recall an unfamiliar trader haggling near the merchant's house days earlier. It's not enough for an arrest, but the Agency logs a strong new suspect profile, and you recover a partial wax impression of one missing seal.`},
+      AC:{tier:'critical', points:-10, text:`Acting on a hunch, you publicly accuse a well-known local trader in the marketplace — and you're wrong. The real thief, watching from the crowd, realizes an agent is on the case and disappears for good, taking the seals with them. The Agency's report is blunt: certainty without evidence is its own kind of failure.`},
+      BA:{tier:'ideal', points:30, text:`Cross-checking the witness's timeline against the city's own carefully managed street activity near the citadel, the story holds up perfectly. You follow the same route the figure used, through the drainage channels and up onto the mound, and recover the stolen seals from a hidden compartment inside the granary.`},
+      BB:{tier:'wrong', points:0, text:`You rush to the citadel alone and arrive breathless — and empty-handed. Whoever the trader saw is long gone, and without backup or a plan, you've lost the trail. The seals are never recovered.`},
+      BC:{tier:'wrong', points:0, text:`You write the trader off as unreliable and head back to the marketplace, but the crowd has thinned and the moment has passed. Without that lead, the trail goes cold.`},
+      CA:{tier:'passable', points:12, text:`Cross-referencing entries stamped in the same distinctive style as the stolen seals, you narrow the record to a handful of suspicious transactions. It's not a full recovery, but the pattern gives the Agency's archivists enough to reconstruct much of what happened.`},
+      CB:{tier:'passable', points:12, text:`The granary administrator is cooperative, and together you identify irregular access on the night of the theft. The seals themselves are never found, but the administrator's account fills crucial gaps in the Agency's case file.`},
+      CC:{tier:'wrong', points:0, text:`You assume the thief would never risk the heavily monitored granary and abandon the lead — a mistake, since that's exactly where the trail led. The seals are never recovered.`}
+    }
+  },
+  legacy:`The Indus Valley Civilisation (also called the Harappan Civilisation) flourished across what is now Pakistan and northwest India from roughly 3300–1300 BCE, making it a contemporary of early Mesopotamia and Egypt. Its cities, including Mohenjo-daro and Harappa, are remarkable for extraordinarily advanced urban planning: grid-patterned streets, standardized fired-brick sizes used across hundreds of kilometers, and the world's earliest known urban sanitation systems, with covered drains running beneath nearly every street. The civilization also produced thousands of carved seals bearing an undeciphered script — one of the great unsolved puzzles of archaeology, since no "Rosetta Stone" for Indus script has ever been found.`,
+  modern:`Modern successor: the standardized, sanitation-first city planning pioneered here anticipates modern municipal engineering — today's building codes, zoning grids, and underground sewer systems trace a conceptual line back to Mohenjo-daro's drains. South Asia's contemporary emphasis on standardized weights and measures in trade also echoes the uniform brick ratios and weight-stones Harappan merchants used to trade fairly across their vast trade network.`,
+  artifact:{name:'Steatite Merchant Seal', icon:'🪔', blurb:'A carved seal bearing undeciphered Indus script.'},
+  quizFallback:{question:'What made Indus Valley cities like Mohenjo-daro unusual for their time?', options:['They had the first known urban sanitation systems and standardized bricks','They were the first to build pyramids','They invented gunpowder','They built the Great Wall'], correctIndex:0}
+},
+{
+  id:'egypt', order:2, era:'c. 2560 BCE', location:'Giza, Old Kingdom Egypt',
+  mapPin:{lat:29.9765, lon:31.1313},
+  title:'The Displaced Cartouche',
+  icon:'𓋹',
+  briefing:`You arrive at Giza in the shadow of the half-built pyramid complex, dust and noise everywhere as thousands of laborers haul limestone under the Old Kingdom sun. Word spreads fast: a carved cartouche relief bearing a pharaoh's name has been pried clean off a tomb wall overnight. In the gap left behind, workers found a strange lightweight sheet unlike any stone, wood, or plaster used anywhere in Egypt.
+
+The pyramid site is a small city in itself. Scribes keep a record office nearby, tracking which crew of stonemasons worked which section each day; the crews themselves are still hard at work on the current shift, chiseling and hauling blocks into place. Beyond the site, the desert perimeter stretches toward the workers' villages, and further off, past the mortuary temple, sit the embalming workshops where priests prepare bodies for the afterlife.
+
+Any of these places could hold the thief's trail — the meticulous scribal records, the stonemasons who had hands-on access to the tomb wall, or the open desert where a fleeing figure might leave footprints. The Agency reminds you: Old Kingdom Egypt ran on careful bookkeeping, so the answer is probably written down somewhere.`,
+  tree:{
+    part1:{ prompt:'How do you begin investigating the missing cartouche relief?', hint:'Every path leads somewhere — but only one gets you to the relief before it\'s lost for good.', options:[
+      {key:'A', text:'Study the tomb\'s construction records kept by the scribes overseeing the pyramid workforce'},
+      {key:'B', text:'Question the stonemasons currently on shift, since they were the last people confirmed near the tomb wall'},
+      {key:'C', text:'Search the desert perimeter for footprints, reasoning a fleeing thief would have to cross open sand to escape'}
+    ]},
+    part2:{
+      A:{ prompt:'The scribe records mention a "foreman\'s mark" system used to track which crew worked where. How do you use it?', options:[
+        {key:'AA', text:'Cross-reference the mark left at the crime scene against the foreman logs to identify which crew had access that night'},
+        {key:'AB', text:'Ask a supervisor for his best guess instead of digging through the records yourself, trusting his years of experience on site'},
+        {key:'AC', text:'Publicly accuse the crew whose mark looks closest, without finishing the cross-reference, since acting fast feels more urgent than being thorough'}
+      ]},
+      B:{ prompt:'One stonemason grows nervous and mentions seeing someone unfamiliar near the tomb wall at dawn. How do you follow up?', options:[
+        {key:'BA', text:'Cross-check his account against the foreman\'s own crew-assignment records for that shift'},
+        {key:'BB', text:'Trust his word completely and rush straight for the desert perimeter to search for footprints'},
+        {key:'BC', text:'Dismiss him as unreliable, since nervous witnesses are common on a site this large'}
+      ]},
+      C:{ prompt:'The footprints lead toward the embalming workshops before vanishing on rockier ground. What now?', options:[
+        {key:'CA', text:'Follow the embalming-ritual angle, using funerary text knowledge to bluff a suspect into revealing his motive'},
+        {key:'CB', text:'Threaten the first embalming worker you find, betting fear will make someone talk fast'},
+        {key:'CC', text:'Give up on the trail since the footprints disappeared, and report back empty-handed'}
+      ]}
+    },
+    leaves:{
+      AA:{tier:'ideal', points:30, text:`Cross-referencing the crime-scene mark against the foreman logs — a real Old Kingdom method for tracking thousands of workers by crew — turns up a work gang that shouldn't have existed that day. You corner them near the embalming workshops and recover the cartouche relief intact, moments before it would have been lost to the sands forever.`},
+      AB:{tier:'passable', points:12, text:`The supervisor's guess points you toward a plausible crew, but without the actual cross-reference you can't be certain, and by the time you narrow it down further the relief has already changed hands. Still, your report documents the foreman-mark system precisely enough for historians to understand exactly how the crime happened.`},
+      AC:{tier:'critical', points:-10, text:`You accuse a crew based on a mark that only looks similar, not confirmed. The real crew's foreman, embarrassed and furious, refuses to cooperate further, and word spreads across the site that accusations are being made without proof — burying whatever thin trail remained.`},
+      BA:{tier:'ideal', points:30, text:`The stonemason's account checks out perfectly against the crew-assignment records, confirming exactly who had access to the tomb wall that morning. You catch the crew mid-attempt to smuggle the relief out through the workers' village and recover it intact.`},
+      BB:{tier:'wrong', points:0, text:`You take the stonemason's word without confirming it and rush into the open desert, but the footprints there turn out to belong to an unrelated laborer. By the time you double back, the relief is long gone.`},
+      BC:{tier:'wrong', points:0, text:`You write the mason off as an unreliable witness on a busy site, but it turns out he was the only person who actually saw the thief. The case goes cold.`},
+      CA:{tier:'passable', points:12, text:`Bluffing your way through a conversation about funerary ritual, you get a suspect talking — he lets slip enough about the theft's motive for the Agency to close out most of the case file, even though the relief itself is never physically recovered.`},
+      CB:{tier:'critical', points:-10, text:`Threatening the first worker you find backfires badly — he's entirely uninvolved, and the embalming workshop staff, offended by the accusation, refuse to speak with Agency investigators again for the rest of the case.`},
+      CC:{tier:'wrong', points:0, text:`You call off the search once the footprints vanish on rocky ground. The trail was recoverable with a bit more patience — but you'll never know, because the case goes cold here.`}
+    }
+  },
+  legacy:`Egypt's Old Kingdom (c. 2686–2181 BCE) is often called the "Age of the Pyramids," producing the Step Pyramid of Djoser and the Great Pyramid of Giza, built under Pharaoh Khufu. Far from slave-built myths, evidence from workers' villages shows the pyramids were constructed by organized, paid labor crews rotated on a schedule, supported by state-run bakeries and breweries. Egyptian scribes maintained meticulous administrative records, and elaborate funerary texts and rituals reflected a civilization deeply organized around the idea of an ordered afterlife mirroring the ordered state.`,
+  modern:`Modern successor: the Old Kingdom's bureaucratic record-keeping — assigning workers to numbered crews, tracking rations and shifts — is an early ancestor of modern project management and payroll systems. Egyptology itself remains a living field, and modern Egypt's tourism economy and museum system (like the Grand Egyptian Museum) are direct stewards of this legacy today.`,
+  artifact:{name:'Limestone Cartouche Relief', icon:'𓋹', blurb:'A carved royal name-plate from a Giza tomb wall.'},
+  quizFallback:{question:'How were pyramid workers organized during the Old Kingdom?', options:['They were unpaid enslaved captives','They worked in organized, paid crews tracked by scribes','They were foreign prisoners of war only','They volunteered with no oversight'], correctIndex:1}
+},
+{
+  id:'mesopotamia', order:3, era:'c. 1750 BCE', location:'Babylon, Mesopotamia',
+  mapPin:{lat:32.5364, lon:44.4208},
+  title:'The Missing Pillar of Law',
+  icon:'📜',
+  briefing:`You step into the mudbrick sprawl of Babylon, where the great ziggurat Etemenanki rises above the rooftops as part of the temple complex devoted to Marduk, the city's patron god. Priests are in an uproar: the black diorite stela inscribed with the king's law code has vanished from the temple grounds. Witnesses describe a flash of light and a strange humming sound in the moments before it disappeared, leaving no obvious trace.
+
+The temple itself keeps a vast archive of clay tablets, recording court judgments, land grants, and trade disputes settled under the very laws now missing. Priests move constantly between the ziggurat's shrines and the archive rooms, while just beyond the temple walls, the Euphrates riverbank bustles with boats unloading grain and timber. Further out, a web of irrigation canals — engineered with famous Babylonian precision — laces the farmland surrounding the city.
+
+Any of these threads might lead you to the stela: the temple's own records, the priests who guard them, or the riverside routes a thief could use to vanish. The Agency suspects whoever took it needed to understand this city's laws well enough to know exactly what they were destroying.`,
+  tree:{
+    part1:{ prompt:'Where do you begin the search for the missing law stela?', hint:'The right lead traces all the way to the thief. The wrong one just documents the loss.', options:[
+      {key:'A', text:'Examine the temple\'s clay-tablet archive for records of who last accessed the stela'},
+      {key:'B', text:'Question the temple priests moving between the shrines and the archive throughout the day'},
+      {key:'C', text:'Search the riverbank for signs of the thief\'s escape route leading away from the city'}
+    ]},
+    part2:{
+      A:{ prompt:'The tablets reveal a recent merchant dispute judged using the very laws now missing. How do you follow it?', options:[
+        {key:'AA', text:'Use the code\'s own proportional-justice logic to work out who felt wronged enough to want the law itself erased'},
+        {key:'AB', text:'Ask the merchant directly with no preparation, hoping he simply volunteers the truth once confronted'},
+        {key:'AC', text:'Assume the dispute is unrelated and abandon this thread entirely, since a business complaint seems too mundane to matter here'}
+      ]},
+      B:{ prompt:'A priest reluctantly admits to seeing an unfamiliar figure near the ziggurat archive at dusk. How do you handle it?', options:[
+        {key:'BA', text:'Cross-check the priest\'s account against temple access logs for that hour'},
+        {key:'BB', text:'Confront the priest publicly in front of the temple staff, demanding he explain why he waited to mention it'},
+        {key:'BC', text:'Dismiss the account, since priests are famously protective of the temple\'s reputation'}
+      ]},
+      C:{ prompt:'You find a scorched patch of earth near the riverbank. What do you make of it?', options:[
+        {key:'CA', text:'Compare it against the irrigation canal maps to see who could reach this remote spot undetected'},
+        {key:'CB', text:'Assume it\'s a lightning strike and drop the lead entirely, since scorched ground near open plains isn\'t unusual'},
+        {key:'CC', text:'Report it without further analysis and wait for someone else back at the temple to interpret what it means'}
+      ]}
+    },
+    leaves:{
+      AA:{tier:'ideal', points:30, text:`The code's own logic of proportional justice points you straight at a merchant who felt the ruling against him was excessive — and who had both the grudge and the temple access to take the stela himself. You catch him just as he's preparing to destroy it for good, and recover all 282 laws intact.`},
+      AB:{tier:'passable', points:12, text:`Caught off guard, the merchant denies everything but stumbles over details only someone close to the theft would know. It's not a confession, but the Agency logs enough to identify him as the likely culprit, even without recovering the stela itself.`},
+      AC:{tier:'wrong', points:0, text:`Assuming the dispute is unrelated costs you the one thread that actually led somewhere. Without it, the trail dries up entirely.`},
+      BA:{tier:'ideal', points:30, text:`Checking the priest's account against the temple's access logs confirms his story down to the hour, and reveals the intruder used a side entrance normally reserved for junior clergy. You follow the same route to a hidden storeroom and recover the stela before real damage is done.`},
+      BB:{tier:'critical', points:-10, text:`Publicly pressed in front of his colleagues, the priest grows defensive and stops cooperating altogether — and worse, the temple hierarchy grows wary of Agency involvement, making every remaining lead inside the temple far harder to pursue.`},
+      BC:{tier:'wrong', points:0, text:`You dismiss the priest's account as temple politics, but it turns out to be the most solid lead in the entire case. By the time you realize your mistake, too much time has passed.`},
+      CA:{tier:'ideal', points:30, text:`Cross-referencing the scorched patch against Babylon's famously precise irrigation canal maps narrows the escape route to a single unguarded lock. You catch the thief mid-escape downstream, and the stela — with its 282 laws, among the oldest detailed legal codes on Earth — is safely returned to the temple.`},
+      CB:{tier:'wrong', points:0, text:`You write the scorched earth off as a lightning strike and move on. It wasn't — and the trail goes cold as a result.`},
+      CC:{tier:'wrong', points:0, text:`You report the scorched patch without analyzing it yourself, and by the time anyone else gets around to it, the thief has long since used the canal network to disappear downstream.`}
+    }
+  },
+  legacy:`Ancient Mesopotamia, the land "between two rivers" (Tigris and Euphrates), gave rise to some of humanity's first cities, writing systems (cuneiform), and codified laws. The Code of Hammurabi, carved around 1754 BCE, is one of the earliest and most complete written legal codes, covering everything from trade disputes to family law, organized around the principle of proportional justice. Mesopotamians also pioneered large-scale irrigation canals that turned an arid floodplain into some of the most productive farmland in the ancient world, and their base-60 number system still shapes how we measure time.`,
+  modern:`Modern successor: written, codified law — the idea that rules should be public, consistent, and apply to disputes predictably — underlies virtually every modern legal system. And every time you check a clock with 60 minutes or a circle with 360 degrees, you're using Mesopotamian mathematics.`,
+  artifact:{name:'Diorite Law Stela Fragment', icon:'📜', blurb:'A fragment of an ancient inscribed law code.'},
+  quizFallback:{question:'What made the Code of Hammurabi historically significant?', options:['It was the first known census','It was one of the earliest and most complete written law codes','It banned all trade','It was a religious text only'], correctIndex:1}
+},
+{
+  id:'greece', order:4, era:'c. 450 BCE', location:'Athens, Classical Greece',
+  mapPin:{lat:37.9838, lon:23.7275},
+  title:'The Stolen Assembly Scroll',
+  icon:'🏛️',
+  briefing:`You arrive on the Pnyx, the rocky hill where the Athenian Assembly gathers to debate and vote on the affairs of the city — the beating heart of the world's first democracy. A vital scroll recording the Assembly's procedures has gone missing just before a major vote, and the presiding officials are in a panic. A citizen no one recognizes was seen nearby, wearing clothing "from no polis anyone knew."
+
+Beside the speaker's platform sits the klepsydra, a water-clock used to time each citizen's turn to speak, its steady drip a fixture of every session. Down the hill, the agora marketplace hums with vendors, gossip, and citizens waiting to hear the day's news. Nearby, a knot of men debate philosophy loudly — Athens being a city where sortition, the random lottery system used to select jurors and many officials, is as familiar a topic as the weather.
+
+One elderly philosopher watches the commotion with obvious interest, occasionally offering unsolicited opinions to anyone who'll listen. Between the water-clock's records, the crowded agora, and this philosopher's suspicious attentiveness, the Agency is confident the scroll hasn't gone far — democracy, after all, rarely keeps secrets for long.`,
+  tree:{
+    part1:{ prompt:'How do you begin your investigation on the Pnyx?', hint:'One thread leads to the philosopher watching from the crowd. The others just watch time run out.', options:[
+      {key:'A', text:'Check the klepsydra records used to time speakers, to establish exactly when the scroll vanished'},
+      {key:'B', text:'Ask citizens gathered on the Pnyx what they noticed in the confusion right after the scroll disappeared'},
+      {key:'C', text:'Search the agora marketplace, on the theory a thief would try to sell the scroll quickly'}
+    ]},
+    part2:{
+      A:{ prompt:'The klepsydra records show the scroll vanished during an unusually long gap in speaking turns. What do you make of it?', options:[
+        {key:'AA', text:'Cross-reference that gap against the sortition records to see who was suspiciously absent from jury selection that same morning'},
+        {key:'AB', text:'Ask a random citizen nearby if they noticed anything unusual during that unusually long gap between speeches that morning'},
+        {key:'AC', text:'Assume the timing is a coincidence and move on without checking it further, since long gaps aren\'t unheard of during a full day of debate'}
+      ]},
+      B:{ prompt:'A citizen mentions the thief avoided being chosen by lot for jury duty that morning. What does that suggest?', options:[
+        {key:'BA', text:'Use the sortition records to see exactly who was missing from the pool entirely'},
+        {key:'BB', text:'Confront the nearest citizen you suspect directly, based on the tip alone, before anyone can verify it further'},
+        {key:'BC', text:'Ignore it, since avoiding jury duty seems like a minor civic complaint unrelated to a stolen scroll'}
+      ]},
+      C:{ prompt:'In the agora, an elderly philosopher offers to help — for a price. Do you accept?', options:[
+        {key:'CA', text:'Decline his offer and cross-examine him using the Socratic method to see if his answers contradict themselves'},
+        {key:'CB', text:'Pay him and hope for the best, trusting that a coin or two will loosen his tongue faster than questions would'},
+        {key:'CC', text:'Refuse and walk away entirely, deciding a philosopher this eager to talk for money is more trouble than he\'s worth'}
+      ]}
+    },
+    leaves:{
+      AA:{tier:'ideal', points:30, text:`Cross-referencing the timing gap against the sortition records turns up exactly one citizen missing from the jury pool that morning — the elderly philosopher who's been hovering near the investigation ever since. Your Socratic cross-examination trips him into contradicting his own alibi, and you recover the Assembly scroll just as the vote is about to be postponed indefinitely.`},
+      AB:{tier:'passable', points:12, text:`The citizen you ask doesn't remember much, but one detail — an unfamiliar face near the speaker's platform — narrows your suspect list considerably. The scroll itself is never physically recovered, but the Agency's account of the theft is solid enough to close most of the file.`},
+      AC:{tier:'wrong', points:0, text:`Assuming the timing is coincidence, you let the strongest lead in the case slip past you. The scroll is never found.`},
+      BA:{tier:'ideal', points:30, text:`The sortition records confirm it: the elderly philosopher, of all people, was never registered in the citizen rolls to begin with — a serious irregularity in a city built on public accountability. Confronted with the proof, he cracks, and you recover the Assembly scroll before the vote can be postponed.`},
+      BB:{tier:'critical', points:-10, text:`Confronting a citizen based on a tip alone, with no evidence, humiliates an innocent man in front of the Assembly — and word spreads fast in a democracy this tightly knit. Whatever cooperation might have followed dries up completely.`},
+      BC:{tier:'wrong', points:0, text:`Jury-duty avoidance seems like a strange detail to chase, so you drop it. It turns out to be the one loose thread that would have unraveled the whole case.`},
+      CA:{tier:'ideal', points:30, text:`Your Socratic cross-examination trips the philosopher into contradicting his own alibi — he was never registered in the citizen rolls to begin with. You recover the Assembly scroll just as the vote is about to be postponed indefinitely.`},
+      CB:{tier:'wrong', points:0, text:`Paying him buys you nothing but vague, evasive answers that lead nowhere. The scroll is gone, and so is your coin.`},
+      CC:{tier:'wrong', points:0, text:`Walking away costs you the only lead willing to talk to you at all. The philosopher's answers, frustrating as they might have been, were closer to the truth than you'll ever know.`}
+    }
+  },
+  legacy:`Classical Athens (5th century BCE) is considered the birthplace of democracy. Under leaders like Pericles, adult male citizens could speak and vote directly in the Assembly on the Pnyx hill, while juries and many offices were filled by sortition — random lottery — rather than election, to prevent wealthy citizens from buying influence. This was also the age of Socrates, Plato's teacher, whose method of relentless questioning to expose contradictions became a foundation of Western philosophy and critical thinking.`,
+  modern:`Modern successor: the very word "democracy" (demos + kratos, "people power") comes from this system, and modern representative democracies, jury trials, and even some proposals for lottery-based civic panels all trace back to Athenian practice. The Socratic method remains a core teaching technique in law schools and philosophy departments today.`,
+  artifact:{name:'Assembly Procedure Scroll', icon:'🏛️', blurb:'A papyrus scroll detailing Athenian democratic process.'},
+  quizFallback:{question:'How were many Athenian jurors and officials chosen?', options:['By royal appointment','By random lottery (sortition)','By wealth alone','By military rank'], correctIndex:1}
+},
+{
+  id:'rome', order:5, era:'c. 100 BCE', location:'Rome, Roman Republic',
+  mapPin:{lat:41.9028, lon:12.4964},
+  title:'The Aqueduct Blueprint Heist',
+  icon:'🏺',
+  briefing:`You land near the office of a Roman censor, one of the officials responsible for public contracts and civic works, just as news breaks that engineering plans for a new aqueduct arch have vanished overnight. In their place: a strange lightweight tube of a material no artisan in Rome has ever seen. The censor's clerks are frantic — without the plans, the aqueduct's next arch cannot be built to the precise gradient Roman engineers require.
+
+Down the street, the Forum bustles with senators, contractors, and clerks haggling over public works, since Roman law required contracts for aqueducts, roads, and sewers to be recorded and open to scrutiny. Beneath the city, the Cloaca Maxima — Rome's great sewer — channels waste out toward the river, its tunnels known mainly to the laborers who maintain them. Beyond the city gates, milestones mark every road with exact distances, a system so precise that couriers use it to time their journeys.
+
+Somewhere between the Forum's contract records, the sewer tunnels, and the road network's obsessive precision, the Agency believes the plans — and whoever took them — can still be found.`,
+  tree:{
+    part1:{ prompt:'Your first move investigating the missing aqueduct blueprint?', hint:'Rome runs on precision — the sharpest lead uses that precision against the thief.', options:[
+      {key:'A', text:'Study the aqueduct\'s gradient calculations to see who had the surveying skill to use the plans'},
+      {key:'B', text:'Question laborers at the construction site, since they\'re on-site every day and notice when something\'s off'},
+      {key:'C', text:'Search the Forum for suspicious activity around the public contract records'}
+    ]},
+    part2:{
+      A:{ prompt:'The gradient calculations require rare surveying expertise. You learn a rival engineer was recently passed over for this very contract. How do you proceed?', options:[
+        {key:'AA', text:'Check the Senate\'s public contract records for his recent bid history on public works'},
+        {key:'AB', text:'Confront him with no evidence, betting that guilt alone will make him crack under pressure'},
+        {key:'AC', text:'Dismiss him as too obvious a suspect, since the real thief would surely be harder to guess'}
+      ]},
+      B:{ prompt:'A laborer mentions a courier seen near the Cloaca Maxima carrying a rolled document. Do you follow?', options:[
+        {key:'BA', text:'Use the city\'s road-mile-marker system to predict exactly where the tunnel exits'},
+        {key:'BB', text:'Chase blindly into the tunnels, trusting speed over a plan'},
+        {key:'BC', text:'Wait at the entrance instead, betting the courier has to come back through the same way'}
+      ]},
+      C:{ prompt:'In the Forum, the contract records show unusual recent activity around the aqueduct bid. How do you use this?', options:[
+        {key:'CA', text:'Cross-reference the recent activity against known surveying engineers with public-works experience'},
+        {key:'CB', text:'Ask a random contractor loitering nearby for gossip, trusting rumor to travel faster than paperwork'},
+        {key:'CC', text:'Assume the records are a dead end since Roman bureaucracy is famously slow to process anything useful'}
+      ]}
+    },
+    leaves:{
+      AA:{tier:'ideal', points:30, text:`The Senate's contract records confirm your suspicion — the rival engineer bid on this exact project and lost it by a narrow margin. Following his known movements to the Cloaca Maxima, Rome's obsessively precise milestones let you predict his escape route to the foot. You catch him as he emerges, blueprint in hand, and the aqueduct project continues on schedule.`},
+      AB:{tier:'critical', points:-10, text:`Confronting him with no evidence backfires — offended and unwilling to cooperate, he alerts contacts across the Forum that an agent is asking pointless questions. Whatever trail existed goes quiet fast.`},
+      AC:{tier:'wrong', points:0, text:`Dismissing the obvious suspect turns out to be a mistake; he was, in fact, exactly who you should have investigated. The blueprints are never recovered.`},
+      BA:{tier:'ideal', points:30, text:`Rome's obsessively precise milestones let you predict the sewer's exit point to the foot. You catch the courier as he emerges, blueprint in hand, and the aqueduct project continues on schedule.`},
+      BB:{tier:'wrong', points:0, text:`You chase blindly into the tunnels and get turned around in the dark. By the time you find your way out, the courier and the blueprint are long gone.`},
+      BC:{tier:'passable', points:12, text:`Waiting at the entrance pays off partially — you catch sight of the courier as he re-emerges, but he slips away in the Forum crowd before you can close the distance. Still, the Agency now has a description and a likely accomplice on record.`},
+      CA:{tier:'ideal', points:30, text:`Cross-referencing the unusual contract activity against known surveying engineers narrows the field to one name — a rival passed over for this exact bid. You trace him to the Cloaca Maxima and, using the city's precise milestone system, predict his exit and catch him with the blueprint in hand.`},
+      CB:{tier:'wrong', points:0, text:`The contractor has nothing useful to offer beyond rumor, and the trail goes cold while you're chasing gossip.`},
+      CC:{tier:'wrong', points:0, text:`Assuming the records are a dead end, you never check them properly — and it turns out they held the name of the actual thief.`}
+    }
+  },
+  legacy:`The Roman Republic (509–27 BCE) built an empire-spanning infrastructure network famous for its engineering: aqueducts that carried water for miles using only gravity and precise gradients, a road network so extensive that "all roads led to Rome," and the Cloaca Maxima, one of the world's earliest large-scale sewer systems. Roman law also introduced concepts like public contracts and civic transparency in government spending, and its republican system of elected offices, checks on power, and a Senate influenced political thought for two thousand years.`,
+  modern:`Modern successor: modern civil engineering — municipal water systems, highway networks, and sewage infrastructure — is a direct descendant of Roman practice. Republican government structures, with elected representatives and separated powers, echo directly in modern constitutional republics, including the founding of the United States centuries later.`,
+  artifact:{name:'Aqueduct Gradient Blueprint', icon:'🏺', blurb:'Engineering plans for a gravity-fed Roman aqueduct.'},
+  quizFallback:{question:'What Roman engineering achievement carried water for miles using only gravity?', options:['The Colosseum','Aqueducts','The Pantheon dome','Roman catapults'], correctIndex:1}
+},
+{
+  id:'tang', order:6, era:'c. 700 CE', location:'Chang\'an, Tang Dynasty China',
+  mapPin:{lat:34.3416, lon:108.9398},
+  title:'The Vanishing Woodblock',
+  icon:'🖨️',
+  briefing:`You arrive in Chang'an, the cosmopolitan capital of Tang China and eastern terminus of the Silk Road, where merchants, monks, and scholars from across Asia mingle in the crowded streets. At a respected printing workshop, a master woodblock used to produce an early Buddhist text has vanished overnight, replaced by a thin sheet of some unfamiliar bendable material that refuses to tear.
+
+The workshop belongs to a guild of printers known for their careful, distinctive carving style, and its apprentices are the last people known to have handled the block. Just outside, the bustling Silk Road market district overflows with silk merchants, spice traders, and travelers passing through, any of whom might have slipped in unnoticed. Word around the city is that the imperial civil service examinations are fast approaching, drawing anxious scholars desperate for every study advantage they can find.
+
+A trader lingering near the workshop entrance seems unusually interested in your investigation, hinting he might know something — for a price. Between the guild's own carving records, the crowded market, and the exam season's desperate scholars, the Agency suspects the woodblock hasn't traveled far.`,
+  tree:{
+    part1:{ prompt:'How do you approach the workshop?', hint:'A forgery this good was made by someone the guild trained — not a stranger.', options:[
+      {key:'A', text:'Examine the carving style to identify which guild of printers made the original block'},
+      {key:'B', text:'Ask the workshop apprentices what they saw, since they were the last people confirmed to have handled the block'},
+      {key:'C', text:'Search the busy Silk Road market district, on the chance the block already changed hands among the crowds'}
+    ]},
+    part2:{
+      A:{ prompt:'The carving style matches the guild\'s technique almost perfectly — almost. How do you investigate the discrepancy?', options:[
+        {key:'AA', text:'Compare the subtle tool-marks against the guild\'s own archive of past commissions'},
+        {key:'AB', text:'Ask the guild master if any apprentice recently left on bad terms'},
+        {key:'AC', text:'Assume the guild itself is responsible and confront the guild master with no proof'}
+      ]},
+      B:{ prompt:'An apprentice nervously mentions a scholar friend desperate for exam materials. How do you follow this?', options:[
+        {key:'BA', text:'Quietly check which scholars have suddenly produced suspiciously polished exam-prep materials'},
+        {key:'BB', text:'Pressure the apprentice for more details on the spot, in front of the whole workshop'},
+        {key:'BC', text:'Dismiss the comment as ordinary workshop gossip, assuming a nervous apprentice is prone to exaggeration'}
+      ]},
+      C:{ prompt:'A trader near the workshop hints he knows something — for a price. How do you respond?', options:[
+        {key:'CA', text:'Offer a fair trade of goods for information, matching local trading customs'},
+        {key:'CB', text:'Threaten to report him to the magistrate unless he talks for free'},
+        {key:'CC', text:'Refuse the trade entirely and walk away, deciding no lead is worth negotiating with someone this evasive'}
+      ]}
+    },
+    leaves:{
+      AA:{tier:'ideal', points:30, text:`The tool-mark comparison is damning — subtle inconsistencies reveal the woodblock in your hands is a near-perfect forgery, carved by someone trained in the guild's own techniques but not currently employed there. Cross-referencing former apprentices, you track the real thief down just as they're about to sell the original block to a private collector, and recover it intact.`},
+      AB:{tier:'passable', points:12, text:`The guild master admits an apprentice left on bad terms months ago, still bitter about being passed over for a commission. It's a strong lead, but by the time you track down his last known workshop, he's already moved on — taking the woodblock with him. Still, the Agency now has a name and a motive on record.`},
+      AC:{tier:'critical', points:-10, text:`You confront the guild master directly with no real proof. Deeply offended, he refuses to cooperate further and warns the rest of the guild against speaking to you. Whatever thin leads remained inside the guild dry up completely, and the real thief — who was never the guild master — escapes clean.`},
+      BA:{tier:'passable', points:12, text:`Quietly checking recent exam submissions, you find one scholar whose materials look suspiciously polished for someone who couldn't previously afford a tutor. He denies everything, but the pattern is enough for the Agency to flag the case as likely solved in principle, even without recovering the block itself.`},
+      BB:{tier:'critical', points:-10, text:`Pressured in front of the whole workshop, the apprentice panics and shuts down completely, insisting he never said anything. Word spreads that an agent is asking pointed questions, and whoever took the block goes deep into hiding. The trail ends here.`},
+      BC:{tier:'wrong', points:0, text:`You write off the apprentice's nervous comment as ordinary workshop gossip. It's only much later — too late — that the Agency realizes it was the one solid lead in the entire case.`},
+      CA:{tier:'passable', points:12, text:`A fair trade of goods loosens the merchant's tongue: he saw someone matching a vague description slip toward the exam district two nights ago. It's not much, but combined with other case notes, the Agency pieces together a plausible account of the theft, even without recovering the block.`},
+      CB:{tier:'wrong', points:0, text:`Threatening the trader backfires — he goes quiet, and word of a magistrate inquiry spreads through the market by evening. Whoever took the woodblock hears about it too, and any trace of them vanishes overnight.`},
+      CC:{tier:'wrong', points:0, text:`You walk away rather than pay for information, a reasonable call — but it costs you the one lead the trader actually had. The case goes cold.`}
+    }
+  },
+  legacy:`The Tang Dynasty (618–907 CE) is considered a golden age of Chinese civilization, a cosmopolitan era connected to the world via the Silk Road. It produced the world's earliest known dated printed book (the Diamond Sutra, 868 CE) using woodblock printing, alongside major advances in the compass, gunpowder's precursors, and an examination system that selected government officials based on merit and scholarship rather than birth alone — a radical idea at the time.`,
+  modern:`Modern successor: woodblock printing is a direct ancestor of movable type and, eventually, the printing press — arguably the single most important information technology before the internet. Merit-based civil service exams also directly inspired modern civil-service testing systems used by governments worldwide, including the structure of many modern bureaucracies.`,
+  artifact:{name:'Diamond Sutra Woodblock', icon:'🖨️', blurb:'A carved printing block for an early Buddhist text.'},
+  quizFallback:{question:'What was the world\'s earliest known dated printed book, produced during the Tang Dynasty?', options:['The Diamond Sutra','The Code of Hammurabi','The Magna Carta','The Analects of Confucius'], correctIndex:0}
+},
+{
+  id:'mughal', order:7, era:'c. 1650 CE', location:'Agra, Mughal India',
+  mapPin:{lat:27.1767, lon:78.0081},
+  title:'The Architect\'s Missing Plan',
+  icon:'🕌',
+  briefing:`You arrive at the bustling construction site of a great domed mausoleum in Agra, where thousands of marble craftsmen, stone-cutters, and garden designers labor under the emperor's watchful commission. The site office's detailed plan for the mausoleum's symmetrical char bagh gardens has vanished overnight, replaced by a sheet covered in measurements using units no surveyor here recognizes.
+
+The marble craftsmen working nearby are the obvious first witnesses, having passed near the office throughout the day. Beyond the site walls, caravans regularly depart the city loaded with goods and travelers, offering an easy escape route for anyone wanting to disappear. Court gossip mentions that a rival royal workshop — one of the many imperial karkhanas competing for the emperor's favor — was recently passed over for this very commission, and has not taken the snub well.
+
+A court calligrapher, known for weaving hidden meanings into Persian verse, approaches you with what he claims is a clue — though decoding it will take real familiarity with Mughal poetic convention. Between the craftsmen, the caravans, and the slighted workshop, the Agency believes the missing plan is still somewhere within reach.`,
+  tree:{
+    part1:{ prompt:'Where do you begin investigating the missing garden plan?', hint:'Two paths lead to the rival workshop\'s storeroom. One leads nowhere at all.', options:[
+      {key:'A', text:'Study the char bagh symmetry principles to figure out which section of the plan is truly missing'},
+      {key:'B', text:'Question the marble craftsmen working on-site, since they notice every change to the plans they\'re building from'},
+      {key:'C', text:'Search caravans leaving the city for the stolen plan before it disappears beyond the empire\'s borders'}
+    ]},
+    part2:{
+      A:{ prompt:'The symmetry study reveals a section referencing a nearby rival workshop\'s unique technique. How do you follow it?', options:[
+        {key:'AA', text:'Check imperial workshop records for who was recently passed over and might hold a grudge'},
+        {key:'AB', text:'Confront the rival workshop\'s head directly without evidence, betting the accusation alone provokes a telling reaction'},
+        {key:'AC', text:'Assume it\'s unrelated and focus your attention elsewhere, since workshop rivalries rarely lead anywhere useful'}
+      ]},
+      B:{ prompt:'A craftsman mentions a court calligrapher has been lingering near the site, offering cryptic clues. How do you respond to his offer?', options:[
+        {key:'BA', text:'Study the poetic conventions of the Mughal court to decode the hidden meaning properly'},
+        {key:'BB', text:'Guess at the meaning without study, trusting instinct to land on whatever he\'s hinting at'},
+        {key:'BC', text:'Ignore the clue as too obscure to be worth the time it would take to properly decode'}
+      ]},
+      C:{ prompt:'Among the departing caravans, you spot one carrying crates stamped with an unfamiliar workshop mark. What now?', options:[
+        {key:'CA', text:'Cross-reference the mark against imperial karkhana registries to identify the workshop'},
+        {key:'CB', text:'Stop the caravan and search it directly without authorization, betting speed matters more than protocol here'},
+        {key:'CC', text:'Let the caravan pass, assuming the unfamiliar mark means nothing worth chasing'}
+      ]}
+    },
+    leaves:{
+      AA:{tier:'ideal', points:30, text:`Cross-referencing the imperial workshop records confirms it — a rival karkhana was passed over for this very commission and never forgave the slight. Following the trail to their storeroom, you recover the garden plan untouched, in time for the symmetrical char bagh gardens to be laid out exactly as designed.`},
+      AB:{tier:'critical', points:-10, text:`Confronting the rival workshop's head without proof causes an embarrassment within the court's competitive karkhana system, and the workshop closes ranks completely. Whatever evidence existed there is gone for good.`},
+      AC:{tier:'wrong', points:0, text:`Assuming the rival workshop is unrelated turns out to be exactly wrong. The plan is never recovered.`},
+      BA:{tier:'ideal', points:30, text:`Decoding the calligrapher's Persian verse — a favorite Mughal court pastime of layered meaning — leads you to the rival workshop's storeroom, where the garden plan sits untouched. You return it in time for the symmetrical char bagh gardens to be laid out exactly as designed.`},
+      BB:{tier:'wrong', points:0, text:`Guessing at the verse's meaning without real study sends you to the wrong district entirely. By the time you correct course, the trail has gone cold.`},
+      BC:{tier:'wrong', points:0, text:`The verse's meaning slips past you, and the plan is never found. Still, your survey of the site lets historians fully reconstruct the garden's intended design.`},
+      CA:{tier:'ideal', points:30, text:`The workshop mark on the crates matches a karkhana recently passed over for this very commission. You intercept the caravan just past the city gates and recover the garden plan, untouched, in time for construction to proceed exactly as designed.`},
+      CB:{tier:'critical', points:-10, text:`Searching the caravan without authorization causes an uproar among the merchants and drivers, and word reaches the court that an agent overstepped. The caravan's actual cargo, and any real lead it held, is lost in the ensuing chaos.`},
+      CC:{tier:'wrong', points:0, text:`You let the caravan pass, assuming the mark is meaningless. It wasn't, and the plan leaves the city for good.`}
+    }
+  },
+  legacy:`The Mughal Empire (1526–1857) ruled much of the Indian subcontinent and produced some of the world's most celebrated architecture, blending Persian, Islamic, and Indian styles. The Taj Mahal (completed 1653), commissioned by Emperor Shah Jahan, exemplifies this synthesis: perfect bilateral symmetry, a monumental dome, intricate inlay work, and formal char bagh gardens representing paradise. Mughal courts were also centers of miniature painting, Persian poetry, and administrative innovation, including detailed record-keeping through imperial workshops (karkhanas).`,
+  modern:`Modern successor: Indo-Islamic architecture continues to influence South Asian design today, from government buildings to mosques, and the Taj Mahal remains one of the most visited monuments on Earth, anchoring a significant share of modern India's tourism economy. Mughal garden design also directly shaped later British and South Asian landscape traditions.`,
+  artifact:{name:'Char Bagh Garden Plan', icon:'🕌', blurb:'An architectural plan for symmetrical paradise gardens.'},
+  quizFallback:{question:'What garden style did Mughal architects use around monuments like the Taj Mahal?', options:['English cottage gardens','Char bagh (four-part paradise gardens)','Japanese rock gardens','Roman courtyard gardens'], correctIndex:1}
+},
+{
+  id:'america', order:8, era:'c. 1776 CE', location:'Philadelphia, Colonial America',
+  mapPin:{lat:39.9526, lon:-75.1652},
+  title:'The Tampered Draft',
+  icon:'🖋️',
+  briefing:`You arrive outside the Pennsylvania State House in Philadelphia, where delegates from the thirteen colonies are gathered behind closed doors, debating a working draft of a declaration that could sever ties with Britain for good. Overnight, the draft was tampered with — several key phrases replaced with strange, oddly modern language — and the original pages are missing entirely.
+
+A doorkeeper stationed at the entrance controls who comes and goes after hours, and swears no stranger passed him. Around the corner, the city's printing shops are busy turning out pamphlets on both sides of the independence question, including one printer recently hired to typeset arguments against breaking from Britain. Inside the State House, committee members tasked with drafting the declaration are anxiously debating what to do next, some urging caution.
+
+One committee member quietly suggests keeping the tampering secret to avoid panicking the wider Congress. Between the doorkeeper's account, the printing shops' rival pamphlets, and the committee's own nerves, the Agency believes the truth is close — if delegates are willing to look for it in the open.`,
+  tree:{
+    part1:{ prompt:'How do you approach the tampered draft?', hint:'Every route can reach the truth here — but only if you insist on the open debate the process was built for.', options:[
+      {key:'A', text:'Compare handwriting samples against known delegates and their committee drafts'},
+      {key:'B', text:'Question the doorkeeper about late-night visitors, since he logs everyone who passes after hours'},
+      {key:'C', text:'Search the printing shops around town for the tampered pages before they\'re set into permanent type'}
+    ]},
+    part2:{
+      A:{ prompt:'The handwriting doesn\'t match any delegate — but it does resemble a printer recently hired to typeset pamphlets against independence. How do you proceed?', options:[
+        {key:'AA', text:'Investigate whether this printer had both motive and press access to alter the document'},
+        {key:'AB', text:'Assume all printers are equally suspect and question each one regardless of how unlikely they seem'},
+        {key:'AC', text:'Ignore the lead, assuming a hired printer has no real reason to tamper with the text'}
+      ]},
+      B:{ prompt:'The doorkeeper swears no stranger passed him, but admits a committee member returned late that night for "forgotten papers." What now?', options:[
+        {key:'BA', text:'Cross-check the committee member\'s account against the printing shops\' records for that same night'},
+        {key:'BB', text:'Confront the committee member publicly during the next session, betting the accusation alone forces a confession'},
+        {key:'BC', text:'Take his word at face value and move on without checking further, trusting a colleague\'s account over paperwork'}
+      ]},
+      C:{ prompt:'At a printing shop, you find scraps of the tampered language already set in type. Who set it?', options:[
+        {key:'CA', text:'Trace the type-setting order back through the shop\'s commission records'},
+        {key:'CB', text:'Accuse the shop owner directly, betting he\'ll confess the moment he feels enough pressure'},
+        {key:'CC', text:'Confiscate the scraps and leave without questioning anyone, assuming the physical evidence alone will be enough'}
+      ]}
+    },
+    leaves:{
+      AA:{tier:'ideal', points:30, text:`Investigating the printer's motive and access confirms both — he was hired specifically to argue against independence, and had after-hours press access. Insisting on full transparency with the committee flushes him out completely, and the original draft is recovered before the final language is debated and adopted.`},
+      AB:{tier:'wrong', points:0, text:`Questioning every printer in town wastes precious time interviewing innocent tradesmen, and by the time you reach the right one, he's already destroyed the evidence.`},
+      AC:{tier:'wrong', points:0, text:`Assuming a hired printer has no motive turns out to be exactly backwards. The draft is never recovered.`},
+      BA:{tier:'ideal', points:30, text:`Cross-checking the committee member's story against the printing shops' own records reveals he stopped at one shop that night — the same shop that turns out to have typeset the tampered language. Insisting on full transparency with the rest of the committee flushes out the truth, and the original draft is recovered before the final language is debated and adopted.`},
+      BB:{tier:'critical', points:-10, text:`Publicly confronting the committee member during session, without confirming the printing-shop connection first, turns out to target the wrong man — he genuinely had forgotten papers. The public accusation embarrasses the committee and hardens everyone against further Agency involvement.`},
+      BC:{tier:'wrong', points:0, text:`Taking him at his word costs you the one detail that would have cracked the case. The tampering is never traced, and the draft is gone.`},
+      CA:{tier:'ideal', points:30, text:`Tracing the type-setting order through the shop's own commission records leads straight to the printer hired to argue against independence. Insisting on full transparency with the committee flushes him out, and the original draft is recovered before the final language is debated and adopted.`},
+      CB:{tier:'critical', points:-10, text:`Accusing the shop owner directly, without proof from his own records, gets you thrown out of the shop — and warns the actual tamperer that someone is closing in, giving him time to destroy what's left of the evidence.`},
+      CC:{tier:'wrong', points:0, text:`Confiscating the scraps without questioning anyone means you never learn who set the type or why. The scraps alone aren't enough to recover the original draft.`}
+    }
+  },
+  legacy:`In the years before 1776, Britain's thirteen American colonies developed increasingly organized systems of self-governance — town meetings, colonial assemblies, and committees of correspondence — while grievances over taxation without representation grew. This period produced vigorous printed debate through pamphlets and newspapers, culminating in the drafting of the Declaration of Independence, a document built on Enlightenment ideas about natural rights and government by consent, debated and revised by committee before being formally adopted.</br>`,
+  modern:`Modern successor: the committee-drafted, publicly debated approach to founding documents set a template still used for modern constitutions and legislation worldwide. The era's vigorous pamphlet press is a direct ancestor of the free press protections enshrined in the First Amendment and echoed in modern journalism and free-speech norms.`,
+  artifact:{name:'Draft Declaration Page', icon:'🖋️', blurb:'A working committee draft with revision marks.'},
+  quizFallback:{question:'What Enlightenment idea most shaped the Declaration of Independence\'s drafting process?', options:['Government by consent and natural rights','Divine right of kings','Strict isolationism','Central bank control'], correctIndex:0}
+},
+{
+  id:'opium', order:9, era:'c. 1842 CE', location:'Canton (Guangzhou), Qing China',
+  mapPin:{lat:23.1291, lon:113.2644},
+  title:'The Altered Trade Ledger',
+  icon:'⚓',
+  briefing:`You arrive at the crowded docks of Canton, the single port where the Qing Dynasty's Canton System permits foreign trade to occur, under the strict oversight of imperial customs officials. A ledger recording the destruction of confiscated opium stocks has been altered, its entries referencing goods and currencies that don't yet exist — just as tensions between Chinese officials and foreign merchants reach a dangerous peak.
+
+Dockworkers unload crates day and night along the crowded waterfront, any of whom might have seen something unusual near the customs house. Nearby, foreign merchant warehouses store goods awaiting inspection, tightly regulated under the Canton System's rules. The city is still buzzing over Commissioner Lin Zexu's recent order to publicly destroy over a thousand tons of confiscated opium, a dramatic stand against the illegal trade that has drawn both praise and fury.
+
+A foreign trading company official approaches you privately, suggesting the whole matter could be "settled quietly" if you're willing to look the other way. Between the dockworkers, the warehouses, and Lin Zexu's own transparency campaign, the Agency suspects the altered ledger is hiding something significant.`,
+  tree:{
+    part1:{ prompt:'Where do you begin investigating the altered customs ledger?', hint:'The paper trail is the whole case here — chasing rumor or force instead tends to burn it.', options:[
+      {key:'A', text:'Cross-reference the ledger against the Canton System\'s strict trade regulations to spot what changed'},
+      {key:'B', text:'Question dockworkers at the harbor, since they handle nearly every crate that passes through customs inspection'},
+      {key:'C', text:'Search foreign merchant warehouses for the missing goods before they\'re quietly shipped out again'}
+    ]},
+    part2:{
+      A:{ prompt:'The cross-reference shows entries referencing goods and currencies that don\'t yet exist, right around the time of Commissioner Lin Zexu\'s opium destruction order. How is this relevant?', options:[
+        {key:'AA', text:'Check whether the altered entries are trying to hide how much opium was actually seized versus destroyed'},
+        {key:'AB', text:'Assume the ledger tampering is unconnected to the opium crackdown and chase a more promising angle instead'},
+        {key:'AC', text:'Ask a random sailor for rumors instead of following the paper trail any further, trusting dockside talk over records'}
+      ]},
+      B:{ prompt:'A dockworker mentions a foreign trading company official has been unusually eager to "settle" recent customs discrepancies quietly. How do you respond when he approaches you directly?', options:[
+        {key:'BA', text:'Decline the offer and report the discrepancy through official channels, matching Lin\'s own transparency'},
+        {key:'BB', text:'Accept the quiet settlement, reasoning that avoiding a public scandal now is worth more than the truth to everyone involved'},
+        {key:'BC', text:'Threaten the official directly, betting that intimidation gets answers faster than paperwork ever could'}
+      ]},
+      C:{ prompt:'Inside a warehouse, you find crates logged under the same altered figures from the ledger. What do you do?', options:[
+        {key:'CA', text:'Cross-reference the crate manifests against official Canton System inspection records'},
+        {key:'CB', text:'Confront the warehouse manager directly with an accusation, betting he\'ll crack under the pressure'},
+        {key:'CC', text:'Leave the crates untouched, assuming inspection isn\'t your job and someone else will follow up later'}
+      ]}
+    },
+    leaves:{
+      AA:{tier:'ideal', points:30, text:`Checking the altered entries against what was actually seized versus destroyed exposes the truth: a foreign trading company falsified the ledger to hide how much opium it managed to keep out of Commissioner Lin's public destruction. Reporting through official channels forces the tampering into the open, and the true numbers are restored — a small but real vindication of Lin's transparency effort, just before tensions boil over into open conflict.`},
+      AB:{tier:'wrong', points:0, text:`Assuming the ledger tampering is unconnected to the opium crackdown, you chase an unrelated angle for days. By the time you circle back, the true entries have already been destroyed.`},
+      AC:{tier:'wrong', points:0, text:`Rumors from a random sailor lead nowhere useful, and the actual paper trail goes cold while you're chasing gossip on the docks.`},
+      BA:{tier:'ideal', points:30, text:`Declining the quiet settlement and reporting through official channels forces the ledger tampering into the open, and the true numbers are restored — a small but real vindication of Commissioner Lin's transparency effort, just before tensions boil over into open conflict.`},
+      BB:{tier:'wrong', points:0, text:`The quiet settlement buries the discrepancy, and the true ledger entries are never recovered. Your case file still preserves an accurate account of the Canton trade system for future historians.`},
+      BC:{tier:'critical', points:-10, text:`Threatening the official directly causes an immediate diplomatic incident between the trading company and Chinese customs officials — precisely the kind of confrontation Commissioner Lin was trying to avoid through legal, public process. The real tampering is buried in the resulting chaos.`},
+      CA:{tier:'ideal', points:30, text:`Cross-referencing the crate manifests against official inspection records confirms the same falsified figures found in the ledger. Reporting the match through official channels forces the tampering into the open, and the true numbers are restored — a small but real vindication of Commissioner Lin's transparency effort, just before tensions boil over into open conflict.`},
+      CB:{tier:'critical', points:-10, text:`Accusing the warehouse manager with no documentation backing you up gets you removed from the premises by his own guards, and word spreads to the trading company that an agent is asking pointed questions — giving them time to cover their tracks completely.`},
+      CC:{tier:'wrong', points:0, text:`Leaving the crates untouched means you never confirm the connection to the ledger. The discrepancy is never proven, and the true entries are lost.`}
+    }
+  },
+  legacy:`By the early 1800s, the Qing Dynasty restricted foreign trade to the single port of Canton (the "Canton System"), while British merchants illegally sold opium grown in India to Chinese buyers on a massive scale, causing widespread addiction and a silver drain. In 1839, Commissioner Lin Zexu ordered the confiscation and public destruction of over a thousand tons of opium, an act that helped trigger the First Opium War (1839–1842). China's defeat led to the Treaty of Nanking, ceding Hong Kong and opening additional ports — a pivotal and painful turning point often called the start of China's "Century of Humiliation."`,
+  modern:`Modern successor: this era's legacy shapes modern China's strong emphasis on national sovereignty and its historical narrative around "never again" being subject to unequal treaties, directly informing modern Chinese foreign policy and trade negotiating posture. It also underlies the modern international framework for controlling narcotics trade.`,
+  artifact:{name:'Canton Customs Ledger', icon:'⚓', blurb:'A trade ledger from the height of the Canton System.'},
+  quizFallback:{question:'What triggered the First Opium War?', options:['A dispute over silk tariffs','Commissioner Lin Zexu\'s crackdown on the illegal opium trade','A border war with Russia','A famine in Canton'], correctIndex:1}
+},
+{
+  id:'meiji', order:10, era:'c. 1872 CE', location:'Tokyo, Meiji Japan',
+  mapPin:{lat:35.6762, lon:139.6503},
+  title:'The Future Blueprint',
+  icon:'🚂',
+  briefing:`You arrive at a Ministry of Industry office in Tokyo, where officials are scrambling after a blueprint for Japan's first railway line vanished overnight. In its place, engineers found a design sketch for a machine that looks decades ahead of anything currently possible — utterly out of place in a nation only just beginning to industrialize.
+
+The Ministry has been relying heavily on foreign advisors brought in to help modernize Japan's infrastructure, and keeps detailed records of who visits its offices. Nearby, railway construction workers are busy laying track under tight deadlines, while down at the port district, smugglers and merchants alike move goods in and out of the harbor with little oversight. Among the workers, a former samurai — recently stripped of his stipend under the new reforms abolishing samurai privileges — has taken up manual labor to make ends meet.
+
+A young engineer, educated abroad through the government's overseas study program, offers to help decode the strange blueprint, clearly eager to prove her expertise is worth taking seriously. Between the Ministry's own records, the railway site, and the port district's shadier corners, the Agency believes the answer lies in just how fast this country is changing.`,
+  tree:{
+    part1:{ prompt:'How do you begin?', hint:'The paper trail through the Ministry\'s own records is more reliable than any single witness.', options:[
+      {key:'A', text:'Review the ministry\'s records of foreign advisors invited to help modernize Japan\'s infrastructure'},
+      {key:'B', text:'Question railway construction workers, since they\'re on site constantly and might have noticed anything unusual'},
+      {key:'C', text:'Search the port district for smugglers, on the theory a stolen blueprint might already be headed overseas'}
+    ]},
+    part2:{
+      A:{ prompt:'The ministry\'s visitor logs are incomplete, but one foreign advisor\'s visits spike right before the theft. How do you investigate?', options:[
+        {key:'AA', text:'Cross-reference his visit dates against exactly which blueprints were accessible each time'},
+        {key:'AB', text:'Confront the advisor directly and demand an explanation, trusting his reaction alone will reveal the truth'},
+        {key:'AC', text:'Assume a foreigner must be responsible without checking further, since he\'s the newest face in the building'}
+      ]},
+      B:{ prompt:'A railway worker mentions the former samurai laborer seemed unusually interested in the ministry building lately. How do you handle this?', options:[
+        {key:'BA', text:'Discreetly observe the laborer\'s movements before approaching him'},
+        {key:'BB', text:'Publicly accuse him in front of his crew based on the rumor alone'},
+        {key:'BC', text:'Dismiss the tip as unrelated to a blueprint theft, since railway workers gossip about everything anyway'}
+      ]},
+      C:{ prompt:'Smugglers in the port district are cagey, but one hints the blueprint might already be gone, smuggled out on a foreign ship. How do you follow up?', options:[
+        {key:'CA', text:'Ask the young overseas-trained engineer to help identify which departing ships could plausibly carry stolen technical documents'},
+        {key:'CB', text:'Try to bribe the smuggler for the ship\'s name, assuming coin will loosen his tongue faster than questions would'},
+        {key:'CC', text:'Report the tip straight to the port authorities and wait for their investigation'}
+      ]}
+    },
+    leaves:{
+      AA:{tier:'ideal', points:30, text:`Cross-referencing the advisor's visit dates against exactly which blueprints were accessible each time, a clear pattern emerges — he was never in the room when the railway plans went missing, but his assistant was, using his credentials. Confronted with the timeline, the assistant confesses, and the original blueprint is recovered intact, along with the truth behind the strange future-tech sketch: a decoy meant to distract the investigation.`},
+      AB:{tier:'passable', points:12, text:`Confronted directly, the advisor is offended but not unhelpful — he insists on his innocence and volunteers his own itinerary, which does narrow the suspect pool somewhat. It's not a full resolution, but the Agency logs a credible partial account of the ministry's access patterns that day.`},
+      AC:{tier:'critical', points:-10, text:`Acting on assumption alone, you accuse the visiting advisor without evidence. The diplomatic fallout is immediate and embarrassing for the ministry, straining the very foreign partnerships Japan is relying on to modernize — and the real culprit, watching the scandal unfold, quietly destroys any remaining trace of the theft.`},
+      BA:{tier:'passable', points:12, text:`Discreet observation shows the laborer visiting the ministry grounds after hours — but only to petition for unpaid wages owed from his railway work, unrelated to the theft. It's a dead end for the case itself, but the Agency notes his account clears an innocent man and offers a small, useful window into ministry security gaps.`},
+      BB:{tier:'critical', points:-10, text:`Publicly accused in front of his entire crew, the former samurai — innocent of the theft — is humiliated and quits on the spot, and the rest of the railway crew grows openly hostile to further questions from Agency staff. Whatever cooperation might have been possible from the workers is gone for the rest of the case.`},
+      BC:{tier:'wrong', points:0, text:`You dismiss the worker's tip as unrelated gossip. It turns out to be a dead end regardless, but you'll never know for certain — the case goes cold without it being followed up properly.`},
+      CA:{tier:'wrong', points:0, text:`The engineer helps you narrow the list of departing ships, but by the time you reach the harbor, the tide has already carried the most likely vessel out to sea. The lead was sound; the timing wasn't.`},
+      CB:{tier:'wrong', points:0, text:`The smuggler takes your money and vanishes into the crowd without ever giving up the ship's name. It's a costly lesson in port-district trust.`},
+      CC:{tier:'wrong', points:0, text:`Port authority oversight in this district is famously thin, and your report sits unprocessed for days — long past any hope of stopping a ship already at sea. The case goes cold.`}
+    }
+  },
+  legacy:`The Meiji Restoration (1868) ended over two centuries of feudal Tokugawa shogunate rule and rapidly transformed Japan into a modern industrial and military power in just decades. The new government abolished the samurai class's special privileges, built railways and telegraph lines, sent students and officials abroad to study Western technology and institutions, and adopted a new constitution — all while deliberately preserving distinctly Japanese cultural identity rather than simply copying the West.`,
+  modern:`Modern successor: this era's blend of rapid technological adoption with cultural continuity is often cited as a model for national modernization, and directly set the foundation for Japan's 20th-century emergence as an industrial and technological power — the same drive visible in modern Japanese manufacturing, robotics, and rail engineering (including the Shinkansen "bullet train" lineage).`,
+  artifact:{name:'Railway Ministry Blueprint', icon:'🚂', blurb:'An early technical plan for Japan\'s first railway.'},
+  quizFallback:{question:'What characterized Japan\'s Meiji Restoration?', options:['Isolation and rejection of all foreign technology','Rapid industrial modernization while preserving cultural identity','Return to strict shogunate rule','Abolition of all central government'], correctIndex:1}
+}
+];
+
+const INTERSTITIALS = [
+  `Your first case closed, a message flickers across your Chrono Communicator: "Ten sites flagged for tampering across four thousand years of history. The Anachronist moves fast. So must you." The Agency reroutes your next jump — westward, and further back in time.`,
+  `A pattern is emerging in your reports: every stolen artifact represents a civilization's defining achievement. "They're not just stealing objects," your handler notes. "They're stealing proof that these achievements happened at all." Your next coordinates lock in.`,
+  `The Agency's archivists flag something troubling — the out-of-time objects left behind at each scene share a faint energy signature. Someone is definitely working across eras deliberately, not randomly. You're cleared for your next jump, centuries forward.`,
+  `Between assignments, the Agency shows you a slide of the artifacts you've recovered so far, each one a thread connecting an ancient achievement to something in your own time. "This is the real mission," your handler says. "Not just catching a thief — understanding why the thread matters." Onward.`,
+  `Your Evidence Bag is growing heavier, each artifact a small rescued piece of a much longer human story. The Anachronist's next target, the Agency warns, sits at the center of one of history's most enduring engineering legacies.`,
+  `A new alert: the Anachronist has jumped east, into a dynasty famous for an invention the Agency insists "changed how information itself moved through the world." You feel the weight of that as you prepare to jump.`,
+  `Halfway through your file, a note from the Agency director appears: "Every civilization you've visited built something that outlived it. Keep watching for that pattern — it'll matter later." Your next jump takes you into an empire famous for building paradise out of marble.`,
+  `The trail turns toward a much younger nation, still arguing over the words that will define it. The Agency reminds you: even documents can be stolen, tampered with, or lost to history if no one is watching closely enough.`,
+  `Your Communicator crackles with static — the timeline feels thinner here, closer to a turning point the Agency calls "one of the hardest chapters to protect accurately." Proceed with care.`,
+  `One case remains. The Anachronist's trail leads to an era of astonishingly fast transformation — a reminder, your handler says, "that history doesn't always move slowly. Sometimes it changes in a single generation." Final jump: locked in.`
+];
+
+const EPILOGUE_TEXT = `Case file closed. Ten civilizations, ten recovered threads of history — some fully rescued, some only documented, all of them preserved either way. The Anachronist is still out there somewhere in the timeline. But for now, the Chrono Agency thanks you, Agent, for making sure history's legacies survive to reach the present day.`;
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+let state = null; // current player's run
+/*
+state = {
+  name, score, currentIndex (0..9), phase ('interstitial'|'case'|'map'|'complete'),
+  decisionStep (0..2), decisionScoreThisCase,
+  results: [{id, success, artifact|null, order}]
+}
+*/
+
+function freshState(name){
+  return {
+    name,
+    score:0,
+    currentIndex:0,
+    phase:'interstitial-pre', // before case 0 briefing, no interstitial needed for case 0
+    decisionStep:0,
+    decisionScoreThisCase:0,
+    treePath:'', // for tree-based cases: '' -> 'A' (part1 chosen) -> 'AB' (part2/leaf chosen)
+    results:[],
+    optionOrders:{}, // per-case, per-decision shuffled option order — randomized fresh each playthrough
+    reviewingCaseId:null // set while replaying a past case's tree without affecting score/results
+  };
+}
+
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+function loadState(name){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return null;
+    const parsed = JSON.parse(raw);
+    if(parsed.name && parsed.name.toLowerCase() === name.toLowerCase()) return parsed;
+  }catch(e){}
+  return null;
+}
+
+/* =====================================================================
+   LEADERBOARD (Workers KV with localStorage fallback)
+   ===================================================================== */
+async function fetchLeaderboard(){
+  try{
+    const res = await fetch(KV_ENDPOINT, {method:'GET'});
+    if(res.ok){
+      const data = await res.json();
+      if(Array.isArray(data)) return data;
+    }
+  }catch(e){ /* fall through to local */ }
+  return getLocalLeaderboard();
+}
+function getLocalLeaderboard(){
+  try{
+    const raw = localStorage.getItem(LEADERBOARD_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+function setLocalLeaderboard(list){
+  try{ localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(list)); }catch(e){}
+}
+async function submitScore(entry){
+  // entry: {name, score, evidence:[names]}
+  let list = getLocalLeaderboard();
+  const existingIdx = list.findIndex(e => e.name.toLowerCase() === entry.name.toLowerCase());
+  if(existingIdx >= 0){
+    if(list[existingIdx].score <= entry.score) list[existingIdx] = entry;
+  } else {
+    list.push(entry);
+  }
+  list.sort((a,b)=>b.score-a.score);
+  setLocalLeaderboard(list);
+  try{
+    await fetch(KV_ENDPOINT, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(entry)
+    });
+  }catch(e){ /* offline / no worker deployed yet — local copy still saved */ }
+}
+async function teacherUpdateEntry(index, updated){
+  let list = getLocalLeaderboard();
+  if(updated === null){ list.splice(index,1); } else { list[index] = updated; }
+  setLocalLeaderboard(list);
+  try{
+    await fetch(KV_ENDPOINT, {
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({list})
+    });
+  }catch(e){}
+}
+async function teacherClearAll(){
+  setLocalLeaderboard([]);
+  try{
+    await fetch(KV_ENDPOINT, {method:'DELETE'});
+  }catch(e){}
+}
+
+/* =====================================================================
+   CLASS SETTINGS (Workers KV with localStorage fallback) — e.g. whether
+   students are allowed to use Review Mode on a resolved case.
+   ===================================================================== */
+let classSettings = { reviewModeEnabled: true }; // client-side cache; review mode defaults ON
+
+function getLocalSettings(){
+  try{
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function setLocalSettings(settings){
+  try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }catch(e){}
+}
+async function fetchClassSettings(){
+  let resolved = getLocalSettings() || {};
+  try{
+    const res = await fetch(SETTINGS_ENDPOINT, {method:'GET'});
+    if(res.ok){
+      const data = await res.json();
+      if(data && typeof data === 'object' && !data.error) resolved = data;
+    }
+  }catch(e){ /* offline / no worker deployed yet — local copy still used */ }
+  classSettings = { reviewModeEnabled: true, ...resolved };
+  setLocalSettings(classSettings);
+  return classSettings;
+}
+async function saveClassSettings(partial){
+  classSettings = { ...classSettings, ...partial };
+  setLocalSettings(classSettings);
+  try{
+    await fetch(SETTINGS_ENDPOINT, {
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(classSettings)
+    });
+  }catch(e){ /* offline / no worker deployed yet — local copy still saved */ }
+}
+
+/* =====================================================================
+   RANDOMIZER — shuffles decision/quiz option order so the correct or
+   highest-value answer isn't predictably in the same position every game.
+   ===================================================================== */
+function shuffledIndices(n){
+  const arr = Array.from({length:n}, (_,i)=>i);
+  for(let i=arr.length-1; i>0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Returns a shuffled index order for a given case's decision, generating
+// it once per playthrough and persisting it so the order stays stable
+// across re-renders/reloads of the same decision (but is fresh every game).
+function getOptionOrder(caseId, decisionIndex, optionsLength){
+  if(!state.optionOrders) state.optionOrders = {};
+  // Plain object, not an array: tree cases use string keys ('p1', 'p2-A') alongside
+  // flat-decision cases' numeric keys (0,1,2) — JSON.stringify silently drops named
+  // properties from arrays, so an object is required for these to survive a reload.
+  if(!state.optionOrders[caseId]) state.optionOrders[caseId] = {};
+  if(!state.optionOrders[caseId][decisionIndex]){
+    state.optionOrders[caseId][decisionIndex] = shuffledIndices(optionsLength);
+    saveState();
+  }
+  return state.optionOrders[caseId][decisionIndex];
+}
+
+/* =====================================================================
+   DOM HELPERS
+   ===================================================================== */
+const $ = sel => document.querySelector(sel);
+const el = (tag, attrs={}, children=[]) => {
+  const e = document.createElement(tag);
+  for(const k in attrs){
+    if(k === 'class') e.className = attrs[k];
+    else if(k === 'html') e.innerHTML = attrs[k];
+    else e.setAttribute(k, attrs[k]);
+  }
+  (Array.isArray(children)?children:[children]).forEach(c=>{
+    if(typeof c === 'string') e.appendChild(document.createTextNode(c));
+    else if(c) e.appendChild(c);
+  });
+  return e;
+};
+
+/* =====================================================================
+   WORLD MAP — real coastlines via world-atlas TopoJSON + d3, equirectangular
+   projection, with an offline-safe fallback if the data can't be fetched.
+   ===================================================================== */
+const MAP_W = 960, MAP_H = 500;
+const WORLD_DATA_URLS = [
+  '/api/map', // self-hosted copy in your own Cloudflare Workers KV (see worker.js)
+  'https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json',
+  'https://unpkg.com/world-atlas@2/land-110m.json'
+];
+let worldMapCache = null; // {ok, land, projection} — fetched once, reused
+
+function equirectFallback([lon, lat]){
+  const x = (lon + 180) / 360 * MAP_W;
+  const y = (90 - lat) / 180 * MAP_H;
+  return [x, y];
+}
+
+async function ensureWorldLoaded(){
+  if(worldMapCache) return worldMapCache;
+  if(typeof d3 === 'undefined' || typeof topojson === 'undefined'){
+    console.warn('Chrono Heist map: d3/topojson failed to load from CDN — using simplified atlas view.');
+    worldMapCache = { ok:false, projection: equirectFallback };
+    return worldMapCache;
+  }
+  for(const url of WORLD_DATA_URLS){
+    try{
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('HTTP ' + res.status + ' from ' + url);
+      const topo = await res.json();
+      const land = topojson.feature(topo, topo.objects.land);
+      const projectionInstance = d3.geoEquirectangular().fitExtent([[14,14],[MAP_W-14,MAP_H-14]], land);
+      const pathGen = d3.geoPath(projectionInstance);
+      worldMapCache = { ok:true, land, pathGen, projection: (lonLat)=>projectionInstance(lonLat) };
+      return worldMapCache;
+    }catch(e){
+      console.warn('Chrono Heist map: failed to load world data from', url, '—', e.message);
+    }
+  }
+  worldMapCache = { ok:false, projection: equirectFallback };
+  return worldMapCache;
+}
+
+async function renderMap(showAll){
+  const wrap = el('div', {class:'map-wrap'});
+  wrap.appendChild(el('div', {class:'map-caption'}, 'CHRONO AGENCY SITUATION MAP — locations reveal as you travel'));
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('id','worldmap');
+  svg.setAttribute('viewBox', `0 0 ${MAP_W} ${MAP_H}`);
+
+  const ocean = document.createElementNS(svgNS,'rect');
+  ocean.setAttribute('x',0); ocean.setAttribute('y',0);
+  ocean.setAttribute('width',MAP_W); ocean.setAttribute('height',MAP_H);
+  ocean.setAttribute('fill','var(--ocean)');
+  svg.appendChild(ocean);
+
+  const world = await ensureWorldLoaded();
+
+  if(world.ok){
+    const landPath = document.createElementNS(svgNS,'path');
+    landPath.setAttribute('d', world.pathGen(world.land));
+    landPath.setAttribute('fill', 'var(--land)');
+    landPath.setAttribute('stroke', 'var(--brass)');
+    landPath.setAttribute('stroke-width', '0.6');
+    svg.appendChild(landPath);
+  } else {
+    wrap.appendChild(el('div',{class:'map-loading'}, '(offline — showing a simplified atlas view)'));
+  }
+
+  const project = world.projection;
+  const visited = state.results;
+
+  if(visited.length > 1){
+    let pathD = '';
+    visited.forEach((r, i)=>{
+      const c = CASES.find(cc=>cc.id===r.id);
+      const [x,y] = project([c.mapPin.lon, c.mapPin.lat]);
+      pathD += (i===0?'M':'L') + x + ',' + y + ' ';
+    });
+    const string = document.createElementNS(svgNS,'path');
+    string.setAttribute('d', pathD);
+    string.setAttribute('fill','none');
+    string.setAttribute('stroke','var(--red-string)');
+    string.setAttribute('stroke-width','2');
+    string.setAttribute('stroke-dasharray','7,5');
+    string.setAttribute('opacity','0.85');
+    svg.appendChild(string);
+  }
+
+  // Gather pins to draw first, so we can resolve label collisions before
+  // drawing anything (civilizations like Mesopotamia/Egypt/Indus Valley sit
+  // close together and would otherwise overlap).
+  const pinsToRender = [];
+  CASES.forEach(c=>{
+    const result = visited.find(r=>r.id===c.id);
+    const isCurrent = !result && c.order-1 === state.currentIndex;
+    if(!result && !isCurrent && !showAll) return;
+    const [x,y] = project([c.mapPin.lon, c.mapPin.lat]);
+    pinsToRender.push({c, result, isCurrent, x, y});
+  });
+
+  const placedLabels = []; // bounding boxes of labels already positioned
+  pinsToRender.forEach(p=>{
+    const labelText = `${p.c.order}. ${p.c.location.split(',')[0]} · ${p.c.era}`;
+    const approxWidth = labelText.length * 5.2 + 12;
+    const labelHeight = 13;
+    // Candidate offsets, tried in order: right/center, right/above, right/below,
+    // then the same three mirrored to the left of the pin.
+    const candidates = [
+      {ox:10, oy:4}, {ox:10, oy:-13}, {ox:10, oy:19},
+      {ox:-(approxWidth+2), oy:4}, {ox:-(approxWidth+2), oy:-13}, {ox:-(approxWidth+2), oy:19}
+    ];
+    let chosen = candidates[0];
+    for(const pos of candidates){
+      const bx1 = p.x + pos.ox - 3, by1 = p.y + pos.oy - labelHeight, bx2 = bx1 + approxWidth, by2 = by1 + labelHeight + 4;
+      const collides = placedLabels.some(L => !(bx2 < L.x1 || bx1 > L.x2 || by2 < L.y1 || by1 > L.y2));
+      if(!collides){ chosen = pos; break; }
+    }
+    placedLabels.push({
+      x1: p.x + chosen.ox - 3, y1: p.y + chosen.oy - labelHeight,
+      x2: p.x + chosen.ox - 3 + approxWidth, y2: p.y + chosen.oy - labelHeight + labelHeight + 4
+    });
+    p.labelText = labelText; p.labelOx = chosen.ox; p.labelOy = chosen.oy;
+    p.labelAnchor = chosen.ox < 0 ? 'end' : 'start';
+  });
+
+  pinsToRender.forEach(p=>{
+    const {c, result, isCurrent, x, y} = p;
+    const g = document.createElementNS(svgNS,'g');
+    g.setAttribute('class','pin');
+    g.setAttribute('transform', `translate(${x},${y})`);
+    const color = result ? (result.success ? 'var(--pin-green)' : 'var(--pin-red)') : 'var(--brass-light)';
+
+    if(isCurrent){
+      const pulse = document.createElementNS(svgNS,'circle');
+      pulse.setAttribute('r','13');
+      pulse.setAttribute('fill','none');
+      pulse.setAttribute('stroke','var(--brass-light)');
+      pulse.setAttribute('stroke-width','1.5');
+      pulse.setAttribute('opacity','0.7');
+      g.appendChild(pulse);
+    }
+    const circle = document.createElementNS(svgNS,'circle');
+    circle.setAttribute('class','head');
+    circle.setAttribute('r', result ? '7' : '6');
+    circle.setAttribute('fill', color);
+    circle.setAttribute('stroke', '#0a0f16');
+    circle.setAttribute('stroke-width','1.2');
+    g.appendChild(circle);
+
+    // halo behind the text so it stays legible over the land/ocean art
+    const halo = document.createElementNS(svgNS,'text');
+    halo.setAttribute('class','label-bg');
+    halo.setAttribute('x', p.labelOx); halo.setAttribute('y', p.labelOy);
+    halo.setAttribute('text-anchor', p.labelAnchor);
+    halo.textContent = p.labelText;
+    g.appendChild(halo);
+    const label = document.createElementNS(svgNS,'text');
+    label.setAttribute('x', p.labelOx); label.setAttribute('y', p.labelOy);
+    label.setAttribute('text-anchor', p.labelAnchor);
+    label.textContent = p.labelText;
+    g.appendChild(label);
+
+    svg.appendChild(g);
+  });
+
+  wrap.appendChild(svg);
+  const legend = el('div',{class:'legend'},[
+    el('span',{},[el('span',{class:'dot',style:'background:var(--brass-light)'}), 'Next stop']),
+    el('span',{},[el('span',{class:'dot',style:'background:var(--pin-green)'}), 'Case cracked']),
+    el('span',{},[el('span',{class:'dot',style:'background:var(--pin-red)'}), 'Trail went cold']),
+  ]);
+  const container = el('div',{});
+  container.appendChild(wrap);
+  container.appendChild(legend);
+  return container;
+}
+
+/* =====================================================================
+   RENDER: GAME FLOW
+   ===================================================================== */
+async function renderGame(){
+  $('#hudAgentName').textContent = state.name;
+  $('#hudScore').textContent = 'Points: ' + state.score;
+  const progressEl = $('#hudProgress');
+  if(progressEl){
+    const visited = state.results.length;
+    progressEl.textContent = state.phase === 'complete'
+      ? `${CASES.length} of ${CASES.length} civilizations visited`
+      : `${visited} of ${CASES.length} civilizations visited`;
+  }
+  const mapSection = $('#mapSection');
+  mapSection.innerHTML = '';
+  mapSection.appendChild(await renderMap(false));
+
+  const caseSection = $('#caseSection');
+  caseSection.innerHTML = '';
+
+  if(state.currentIndex >= CASES.length){
+    renderComplete(caseSection);
+    return;
+  }
+
+  if(state.phase === 'interstitial-pre'){
+    if(state.currentIndex === 0){
+      state.phase = 'case';
+      renderGame();
+      return;
+    }
+    renderInterstitial(caseSection);
+    return;
+  }
+
+  if(state.phase === 'case'){
+    renderCase(caseSection);
+    return;
+  }
+}
+
+function renderInterstitial(container){
+  const text = INTERSTITIALS[state.currentIndex - 1] || '';
+  const box = el('div',{class:'interstitial'});
+  box.appendChild(el('h2',{}, 'En Route — Chrono Jump ' + (state.currentIndex+1)));
+  box.appendChild(el('p',{}, text));
+  const btn = el('button',{}, 'Arrive at Destination');
+  btn.onclick = ()=>{ state.phase='case'; saveState(); renderGame(); };
+  box.appendChild(el('div',{style:'margin-top:16px; text-align:center'},[btn]));
+  container.appendChild(box);
+}
+
+/* =====================================================================
+   GENERATIVE AI — "Ask the Chrono Archivist" + AI Field Quiz
+   Both call Cloudflare Pages Functions backed by Workers AI. Both
+   degrade gracefully (friendly message / static fallback question)
+   if the AI is unreachable, so the game never breaks without it.
+   ===================================================================== */
+function renderArchivistPanel(c){
+  const box = el('div',{class:'archivist-box'});
+  box.appendChild(el('h3',{}, '🔮 Ask the Chrono Archivist'));
+  box.appendChild(el('p',{class:'archivist-intro'}, `Curious about ${c.location.split(',')[0]} in ${c.era}? Ask a follow-up question — the Archivist only knows this case's history.`));
+  const responseArea = el('div',{class:'archivist-response'});
+  const row = el('div',{class:'archivist-row'});
+  const input = el('input',{type:'text', placeholder:'e.g. Why did the city need such big granaries?', maxlength:'200'});
+  const askBtn = el('button',{}, 'Ask');
+
+  const doAsk = async ()=>{
+    const q = input.value.trim();
+    if(!q) return;
+    askBtn.disabled = true; askBtn.textContent = 'Thinking…';
+    responseArea.innerHTML = '';
+    responseArea.appendChild(el('div',{class:'archivist-loading'}, 'Consulting the archive…'));
+    try{
+      const res = await fetch(ASK_ENDPOINT, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          civilization: c.location, era: c.era,
+          legacy: c.legacy, modern: c.modern,
+          question: q
+        })
+      });
+      if(!res.ok){
+        const errBody = await res.json().catch(()=>({}));
+        console.error('Chrono Archivist /api/ask failed:', res.status, errBody.error || '(no error detail)');
+        throw new Error(errBody.error || ('HTTP ' + res.status));
+      }
+      const data = await res.json();
+      responseArea.innerHTML = '';
+      responseArea.appendChild(el('div',{class:'archivist-answer'}, data.answer || 'The Archivist has nothing further to add on that.'));
+    }catch(e){
+      responseArea.innerHTML = '';
+      responseArea.appendChild(el('div',{class:'archivist-answer archivist-error'}, 'The Archivist\'s connection is scrambled by the timestream right now — try again in a moment, or read on to the next case.'));
+    }
+    askBtn.disabled = false; askBtn.textContent = 'Ask';
+  };
+
+  askBtn.onclick = doAsk;
+  input.addEventListener('keydown', e=>{ if(e.key === 'Enter') doAsk(); });
+  row.appendChild(input); row.appendChild(askBtn);
+  box.appendChild(row);
+  box.appendChild(responseArea);
+  return box;
+}
+
+function renderQuizPanel(c, rec, pointsLineEl){
+  const box = el('div',{class:'quiz-box'});
+  box.appendChild(el('h3',{}, '🧠 Chrono Field Quiz'));
+
+  if(rec.quizDone){
+    box.appendChild(el('p',{class:'archivist-intro'}, `Quiz complete for this case — you earned ${rec.quizBonus} bonus point${rec.quizBonus===1?'':'s'}.`));
+    return box;
+  }
+
+  box.appendChild(el('p',{class:'archivist-intro'}, 'Test what you just learned — freshly generated questions, worth bonus points.'));
+  const area = el('div',{class:'quiz-area'});
+  const startBtn = el('button',{}, 'Take the Field Quiz');
+
+  startBtn.onclick = async ()=>{
+    startBtn.disabled = true; startBtn.textContent = 'Loading…';
+    let questions = null;
+    let bonusPerQuestion = 5;
+    try{
+      const res = await fetch(QUIZ_ENDPOINT, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ civilization: c.location, era: c.era, legacy: c.legacy, modern: c.modern })
+      });
+      if(res.ok){
+        const data = await res.json();
+        if(Array.isArray(data.questions) && data.questions.length > 0){
+          const valid = data.questions.filter(q =>
+            q && typeof q.question === 'string' &&
+            Array.isArray(q.options) && q.options.length === 4 &&
+            Number.isInteger(q.correctIndex) && q.correctIndex >= 0 && q.correctIndex <= 3
+          );
+          if(valid.length > 0) questions = valid;
+          else console.warn('Chrono Field Quiz: AI returned no valid questions, using fallback.', data.error || '');
+        } else {
+          console.warn('Chrono Field Quiz: AI returned no questions, using fallback.', data.error || '');
+        }
+      } else {
+        const errBody = await res.json().catch(()=>({}));
+        console.error('Chrono Field Quiz /api/quiz failed:', res.status, errBody.error || '(no error detail)');
+      }
+    }catch(e){ console.error('Chrono Field Quiz: request failed', e); /* fall through to static fallback below */ }
+
+    if(!questions){
+      questions = [c.quizFallback];
+      bonusPerQuestion = 15; // single fallback question carries the full bonus
+    }
+    renderQuizQuestions(area, questions, bonusPerQuestion, rec, pointsLineEl);
+  };
+
+  area.appendChild(startBtn);
+  box.appendChild(area);
+  return box;
+}
+
+function renderQuizQuestions(area, questions, bonusPerQuestion, rec, pointsLineEl){
+  area.innerHTML = '';
+  // Shuffle each question's options once, remapping correctIndex to match,
+  // so the correct answer isn't predictably in the same position.
+  const shuffled = questions.map(q=>{
+    const order = shuffledIndices(q.options.length);
+    return {
+      question: q.question,
+      options: order.map(i=>q.options[i]),
+      correctIndex: order.indexOf(q.correctIndex)
+    };
+  });
+  const answers = new Array(shuffled.length).fill(null);
+  const qDivs = [];
+
+  shuffled.forEach((q, qi)=>{
+    const qDiv = el('div',{class:'quiz-question'});
+    qDiv.appendChild(el('div',{class:'quiz-prompt'}, `${qi+1}. ${q.question}`));
+    const optsDiv = el('div',{class:'quiz-options'});
+    q.options.forEach((optText, oi)=>{
+      const optBtn = el('button',{class:'quiz-option-btn'}, optText);
+      optBtn.onclick = ()=>{
+        answers[qi] = oi;
+        optsDiv.querySelectorAll('.quiz-option-btn').forEach(b=>b.classList.remove('selected'));
+        optBtn.classList.add('selected');
+      };
+      optsDiv.appendChild(optBtn);
+    });
+    qDiv.appendChild(optsDiv);
+    area.appendChild(qDiv);
+    qDivs.push(qDiv);
+  });
+
+  const submitBtn = el('button',{}, 'Submit Answers');
+  submitBtn.onclick = ()=>{
+    if(answers.includes(null)){
+      area.appendChild(el('div',{class:'error-text'}, 'Answer every question before submitting.'));
+      return;
+    }
+    let correctCount = 0;
+    shuffled.forEach((q, qi)=>{
+      const btns = qDivs[qi].querySelectorAll('.quiz-option-btn');
+      btns.forEach((b, oi)=>{
+        b.disabled = true;
+        if(oi === q.correctIndex) b.classList.add('correct');
+        else if(oi === answers[qi]) b.classList.add('incorrect');
+      });
+      if(answers[qi] === q.correctIndex) correctCount++;
+    });
+    const bonus = correctCount * bonusPerQuestion;
+    rec.quizDone = true;
+    rec.quizBonus = bonus;
+    state.score += bonus;
+    saveState();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitted';
+    area.appendChild(el('div',{class:'quiz-result'}, `You got ${correctCount} of ${shuffled.length} correct — +${bonus} bonus point${bonus===1?'':'s'}!`));
+    if(pointsLineEl) pointsLineEl.textContent = `Points earned this case: ${rec.pointsAwarded} + ${bonus} quiz bonus`;
+    const hudScoreEl = $('#hudScore');
+    if(hudScoreEl) hudScoreEl.textContent = 'Points: ' + state.score;
+  };
+  area.appendChild(submitBtn);
+}
+
+function renderCase(container){
+  const c = CASES[state.currentIndex];
+  const card = el('div',{class:'case-card'});
+  card.appendChild(el('div',{class:'case-header'},[
+    el('div',{},[
+      el('h2',{}, c.icon + '  ' + c.title),
+      el('div',{class:'case-meta'}, `CASE ${c.order} of ${CASES.length} — ${c.location} — ${c.era}`),
+      el('div',{class:'case-meta', style:'margin-top:4px; opacity:0.75'}, '🔮 Crack the case to unlock the Chrono Archivist Q&A and a field quiz for bonus points.')
+    ]),
+    el('div',{class:'stamp'}, 'ACTIVE INVESTIGATION')
+  ]));
+
+  if(state.treePath === undefined) state.treePath = ''; // backward-compat for older saves
+  if(state.reviewingCaseId === undefined) state.reviewingCaseId = null;
+  const atStart = c.tree ? (state.treePath === '') : (state.decisionStep === 0 && state.decisionScoreThisCase === 0);
+  if(atStart){
+    card.appendChild(el('div',{class:'case-body'}, c.briefing));
+  }
+
+  if(c.tree){
+    renderTreeCase(card, c);
+  } else {
+    renderFlatCase(card, c);
+  }
+
+  container.appendChild(card);
+}
+
+/* ---- Branching-tree cases: Part 1 (A/B/C) -> Part 2 (9 leaves) ---- */
+function renderTreeCase(card, c){
+  const reviewing = state.reviewingCaseId === c.id;
+  const depth = state.treePath.length;
+
+  if(reviewing){
+    card.appendChild(el('div',{class:'case-meta', style:'margin-bottom:10px; opacity:0.8'}, '🔁 Reviewing this case — your score and evidence bag won\'t change.'));
+  }
+
+  if(depth === 0){
+    renderTreeStep(card, c, c.tree.part1, 'p1', 0, (key)=>{ state.treePath = key; saveState(); renderGame(); });
+    return;
+  }
+  if(depth === 1){
+    const node = c.tree.part2[state.treePath];
+    renderTreeStep(card, c, node, 'p2-'+state.treePath, 1, (key)=>{ state.treePath = key; saveState(); renderGame(); });
+    return;
+  }
+
+  // depth === 2: reached a leaf
+  const leaf = c.tree.leaves[state.treePath];
+
+  if(reviewing){
+    // Review mode: show the outcome without touching score/results/evidence.
+    const tier = leaf.tier;
+    const badge = TIER_BADGE[tier] || TIER_BADGE.wrong;
+    card.appendChild(el('div',{class:'resolution-badge ' + badge.cls}, badge.label + ' (review)'));
+    card.appendChild(el('div',{class:'case-body'}, leaf.text));
+    const nav = el('div',{class:'nav-row'});
+    const againBtn = el('button',{class:'secondary'}, 'Try a Different Path');
+    againBtn.onclick = ()=>{ state.treePath = ''; saveState(); renderGame(); };
+    const doneBtn = el('button',{}, 'Back to Case Results');
+    doneBtn.onclick = ()=>{
+      const rec = state.results.find(r=>r.id===c.id);
+      state.reviewingCaseId = null;
+      state.treePath = (rec && rec.recordedPath) || state.treePath;
+      saveState(); renderGame();
+    };
+    nav.appendChild(againBtn);
+    nav.appendChild(doneBtn);
+    card.appendChild(nav);
+    return;
+  }
+
+  const alreadyRecorded = state.results.find(r=>r.id===c.id);
+  if(!alreadyRecorded){
+    state.score += leaf.points;
+    state.results.push({
+      id:c.id, success: leaf.tier==='ideal', tier:leaf.tier, order:c.order,
+      artifact: leaf.tier==='ideal' ? c.artifact : null,
+      pointsAwarded: leaf.points, quizDone:false, quizBonus:0,
+      recordedPath: state.treePath
+    });
+    saveState();
+  }
+  const rec = state.results.find(r=>r.id===c.id);
+  if(rec.quizDone === undefined){ rec.quizDone = false; rec.quizBonus = 0; }
+  const displayLeaf = c.tree.leaves[rec.recordedPath] || leaf;
+  renderResolution(card, c, rec, displayLeaf.text);
+}
+
+function renderTreeStep(card, c, node, cacheKey, stepIndex, onChoose){
+  const dblock = el('div',{class:'decision-block'});
+  const dots = el('div',{class:'progress-dots'});
+  for(let i=0;i<2;i++){ dots.appendChild(el('span',{class: i<stepIndex ? 'filled':''})); }
+  dblock.appendChild(dots);
+  dblock.appendChild(el('div',{class:'decision-prompt'}, node.prompt));
+  if(node.hint){
+    dblock.appendChild(el('div',{class:'decision-hint'}, '💭 ' + node.hint));
+  }
+  const opts = el('div',{class:'options'});
+  const order = getOptionOrder(c.id, cacheKey, node.options.length);
+  order.forEach(optIdx=>{
+    const opt = node.options[optIdx];
+    const b = el('button',{class:'option-btn'}, opt.text);
+    b.onclick = ()=> onChoose(opt.key);
+    opts.appendChild(b);
+  });
+  dblock.appendChild(opts);
+  dblock.appendChild(el('div',{class:'order-note'}, 'Options are shown in a random order each time — reshuffled, not reworded.'));
+  card.appendChild(dblock);
+}
+
+/* ---- Legacy flat-decision cases (independent decisions, threshold-based) ---- */
+function renderFlatCase(card, c){
+  if(state.decisionStep < c.decisions.length){
+    const d = c.decisions[state.decisionStep];
+    const dblock = el('div',{class:'decision-block'});
+    const dots = el('div',{class:'progress-dots'});
+    for(let i=0;i<c.decisions.length;i++){
+      dots.appendChild(el('span',{class: i<state.decisionStep ? 'filled':''}));
+    }
+    dblock.appendChild(dots);
+    dblock.appendChild(el('div',{class:'decision-prompt'}, d.prompt));
+    const opts = el('div',{class:'options'});
+    const order = getOptionOrder(c.id, state.decisionStep, d.options.length);
+    order.forEach(optIdx=>{
+      const opt = d.options[optIdx];
+      const b = el('button',{class:'option-btn'}, opt.text);
+      b.onclick = ()=>{
+        state.decisionScoreThisCase += opt.points;
+        state.decisionStep += 1;
+        saveState();
+        renderGame();
+      };
+      opts.appendChild(b);
+    });
+    dblock.appendChild(opts);
+    dblock.appendChild(el('div',{class:'order-note'}, 'Options are shown in a random order each time — reshuffled, not reworded.'));
+    card.appendChild(dblock);
+    return;
+  }
+
+  // resolution
+  const success = state.decisionScoreThisCase >= c.successThreshold;
+  const alreadyRecorded = state.results.find(r=>r.id===c.id);
+  if(!alreadyRecorded){
+    const pointsAwarded = success ? (c.decisions.length*10) : Math.round(c.decisions.length*10*0.4);
+    state.score += pointsAwarded;
+    state.results.push({id:c.id, success, order:c.order, artifact: success ? c.artifact : null, pointsAwarded, quizDone:false, quizBonus:0});
+    saveState();
+  }
+  const rec = state.results.find(r=>r.id===c.id);
+  if(rec.quizDone === undefined){ rec.quizDone = false; rec.quizBonus = 0; }
+  renderResolution(card, c, rec, rec.success ? c.successText : c.failText);
+}
+
+/* ---- Shared resolution UI (badge, artifact, history, Archivist, quiz, nav) ---- */
+const TIER_BADGE = {
+  ideal:    { label:'CASE CRACKED',        cls:'success'  },
+  passable: { label:'PARTIALLY RESOLVED',  cls:'passable' },
+  wrong:    { label:'TRAIL WENT COLD',     cls:'fail'     },
+  critical: { label:'CASE MISHANDLED',     cls:'critical' }
+};
+
+function renderResolution(card, c, rec, resolutionText){
+  const tier = rec.tier || (rec.success ? 'ideal' : 'wrong'); // flat-decision cases have no tier
+  const badge = TIER_BADGE[tier] || (rec.success ? TIER_BADGE.ideal : TIER_BADGE.wrong);
+
+  card.appendChild(el('div',{class:'resolution-badge ' + badge.cls}, badge.label));
+  card.appendChild(el('div',{class:'case-body'}, resolutionText));
+
+  if(rec.success){
+    card.appendChild(el('div',{class:'artifact-toast'},[
+      el('span',{class:'icon'}, c.artifact.icon),
+      el('span',{}, `Added to Evidence Bag: ${c.artifact.name} — ${c.artifact.blurb}`)
+    ]));
+  }
+
+  const legacyDetails = el('details',{class:'legacy-box'});
+  const summary = el('summary',{}, '📖 Learn More: The Real History');
+  legacyDetails.appendChild(summary);
+  const legacyBody = el('div',{style:'margin-top:10px'});
+  legacyBody.appendChild(el('p',{style:'margin:0'}, c.legacy));
+  legacyBody.appendChild(el('div',{class:'modern'},[
+    el('p',{style:'margin:0'}, c.modern)
+  ]));
+  legacyDetails.appendChild(legacyBody);
+  card.appendChild(legacyDetails);
+
+  const pointsLine = el('div',{class:'case-meta', style:'margin-top:12px'}, `Points earned this case: ${rec.pointsAwarded}${rec.quizDone ? ' + ' + rec.quizBonus + ' quiz bonus' : ''}`);
+
+  card.appendChild(renderArchivistPanel(c));
+  card.appendChild(renderQuizPanel(c, rec, pointsLine));
+  card.appendChild(pointsLine);
+
+  const nav = el('div',{class:'nav-row'});
+  if(tier !== 'ideal' && c.tree && classSettings.reviewModeEnabled){
+    const reviewBtn = el('button',{class:'secondary'}, '🔁 Review This Case (no score change)');
+    reviewBtn.onclick = ()=>{
+      state.reviewingCaseId = c.id;
+      state.treePath = '';
+      saveState();
+      renderGame();
+    };
+    nav.appendChild(reviewBtn);
+  }
+  const contBtn = el('button',{}, state.currentIndex+1 < CASES.length ? 'Continue to Next Jump' : 'Finish Assignment');
+  contBtn.onclick = ()=>{
+    state.currentIndex += 1;
+    state.decisionStep = 0;
+    state.decisionScoreThisCase = 0;
+    state.treePath = '';
+    state.reviewingCaseId = null;
+    state.phase = 'interstitial-pre';
+    saveState();
+    renderGame();
+  };
+  nav.appendChild(contBtn);
+  card.appendChild(nav);
+}
+
+function renderComplete(container){
+  const box = el('div',{class:'interstitial'});
+  box.appendChild(el('h2',{}, 'Assignment Complete'));
+  box.appendChild(el('p',{}, EPILOGUE_TEXT));
+  const successCount = state.results.filter(r=>r.success).length;
+  box.appendChild(el('p',{}, `Final score: ${state.score} points. Cases cracked: ${successCount} of ${CASES.length}.`));
+  const btn = el('button',{}, 'Submit to Leaderboard');
+  btn.onclick = async ()=>{
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+    await submitScore({
+      name: state.name,
+      score: state.score,
+      evidence: state.results.filter(r=>r.success).map(r=>r.artifact.name)
+    });
+    showLeaderboardModal();
+    btn.textContent = 'Submitted!';
+  };
+  box.appendChild(el('div',{style:'text-align:center; margin-top:16px'},[btn]));
+  const backBtn = el('button',{class:'secondary'}, 'Return to Landing');
+  backBtn.style.marginLeft = '10px';
+  backBtn.onclick = ()=>{
+    $('#game').classList.add('hidden');
+    $('#landing').classList.remove('hidden');
+  };
+  box.querySelector('div').appendChild(backBtn);
+  container.appendChild(box);
+}
+
+/* =====================================================================
+   EVIDENCE BAG MODAL
+   ===================================================================== */
+function showEvidenceModal(){
+  const grid = $('#evidenceGrid');
+  grid.innerHTML = '';
+  const collected = state.results.filter(r=>r.success);
+  if(collected.length === 0){
+    grid.appendChild(el('div',{class:'evidence-empty'}, 'No artifacts collected yet. Crack a case to fill your bag.'));
+  } else {
+    collected.forEach(r=>{
+      const c = CASES.find(cc=>cc.id===r.id);
+      grid.appendChild(el('div',{class:'evidence-item'},[
+        el('span',{class:'icon'}, c.artifact.icon),
+        el('div',{}, c.artifact.name)
+      ]));
+    });
+  }
+  $('#evidenceModal').classList.remove('hidden');
+}
+
+/* =====================================================================
+   LEADERBOARD MODAL
+   ===================================================================== */
+async function showLeaderboardModal(){
+  $('#leaderboardModal').classList.remove('hidden');
+  const body = $('#leaderboardBody');
+  body.textContent = 'Loading...';
+  body.style.opacity = '0.7';
+  const list = await fetchLeaderboard();
+  body.style.opacity = '1';
+  if(list.length === 0){
+    body.innerHTML = '<span style="font-style:italic;opacity:0.7">No agents on record yet. Be the first.</span>';
+    return;
+  }
+  const table = el('table',{class:'leaderboard'});
+  table.appendChild(el('tr',{},[
+    el('th',{},'Rank'), el('th',{},'Agent'), el('th',{},'Points'), el('th',{},'Evidence Bag')
+  ]));
+  list.sort((a,b)=>b.score-a.score).forEach((entry,i)=>{
+    table.appendChild(el('tr',{},[
+      el('td',{}, '#'+(i+1)),
+      el('td',{}, entry.name),
+      el('td',{class:'num'}, String(entry.score)),
+      el('td',{}, (entry.evidence||[]).join(', ') || '—')
+    ]));
+  });
+  body.innerHTML = '';
+  body.appendChild(table);
+}
+
+/* =====================================================================
+   TEACHER TOOLS
+   ===================================================================== */
+async function renderTeacherScreen(){
+  await fetchClassSettings();
+  const reviewToggle = $('#reviewModeToggle');
+  const reviewStatus = $('#reviewModeStatus');
+  reviewToggle.checked = !!classSettings.reviewModeEnabled;
+  reviewToggle.onchange = async ()=>{
+    reviewStatus.style.color = '';
+    reviewStatus.textContent = 'Saving…';
+    await saveClassSettings({ reviewModeEnabled: reviewToggle.checked });
+    reviewStatus.textContent = reviewToggle.checked
+      ? 'Review Mode is ON for all students.'
+      : 'Review Mode is OFF for all students.';
+  };
+
+  const wrap = $('#teacherTableWrap');
+  wrap.innerHTML = 'Loading...';
+  const list = await fetchLeaderboard();
+  wrap.innerHTML = '';
+  if(list.length === 0){
+    wrap.appendChild(el('p',{}, 'No leaderboard entries yet.'));
+    return;
+  }
+  const table = el('table',{class:'leaderboard'});
+  table.appendChild(el('tr',{},[
+    el('th',{},'Agent'), el('th',{},'Points'), el('th',{},'Evidence Bag'), el('th',{},'Actions')
+  ]));
+  list.forEach((entry, idx)=>{
+    const nameInput = el('input',{type:'text', value:entry.name, style:'width:100px'});
+    const scoreInput = el('input',{type:'text', value:String(entry.score), style:'width:70px'});
+    nameInput.value = entry.name;
+    scoreInput.value = entry.score;
+    const saveBtn = el('button',{}, 'Save');
+    saveBtn.style.fontSize = '0.7rem';
+    saveBtn.style.padding = '5px 10px';
+    saveBtn.onclick = async ()=>{
+      const updated = {...entry, name:nameInput.value.trim()||entry.name, score:parseInt(scoreInput.value,10)||0};
+      await teacherUpdateEntry(idx, updated);
+      renderTeacherScreen();
+    };
+    const delBtn = el('button',{class:'danger'}, 'Delete');
+    delBtn.style.fontSize = '0.7rem';
+    delBtn.style.padding = '5px 10px';
+    delBtn.style.marginLeft = '6px';
+    delBtn.onclick = async ()=>{
+      await teacherUpdateEntry(idx, null);
+      renderTeacherScreen();
+    };
+    const tdName = el('td',{}); tdName.appendChild(nameInput);
+    const tdScore = el('td',{}); tdScore.appendChild(scoreInput);
+    const tdActions = el('td',{}); tdActions.appendChild(saveBtn); tdActions.appendChild(delBtn);
+    table.appendChild(el('tr',{},[
+      tdName, tdScore, el('td',{}, (entry.evidence||[]).join(', ')||'—'), tdActions
+    ]));
+  });
+  wrap.appendChild(table);
+}
+
+/* =====================================================================
+   EVENT WIRING
+   ===================================================================== */
+$('#beginBtn').onclick = async ()=>{
+  const nameRaw = $('#agentNameInput').value.trim();
+  $('#landingError').textContent = '';
+  if(!nameRaw){
+    $('#landingError').textContent = 'Enter an agent name to begin.';
+    return;
+  }
+  if(nameRaw.toLowerCase() === 'palpatine'){
+    $('#teacherPwModal').classList.remove('hidden');
+    $('#teacherPwInput').value = '';
+    $('#teacherPwError').textContent = '';
+    setTimeout(()=>$('#teacherPwInput').focus(), 50);
+    return;
+  }
+  await fetchClassSettings();
+  const existing = loadState(nameRaw);
+  state = existing || freshState(nameRaw);
+  $('#landing').classList.add('hidden');
+  $('#game').classList.remove('hidden');
+  renderGame();
+};
+
+$('#agentNameInput').addEventListener('keydown', e=>{
+  if(e.key === 'Enter') $('#beginBtn').click();
+});
+
+$('#viewLeaderboardBtn').onclick = showLeaderboardModal;
+$('#closeLeaderboard').onclick = ()=> $('#leaderboardModal').classList.add('hidden');
+$('#howToPlayBtn').onclick = ()=> $('#howToModal').classList.remove('hidden');
+$('#closeHowTo').onclick = ()=> $('#howToModal').classList.add('hidden');
+
+$('#hudMapBtn').onclick = ()=>{
+  window.scrollTo({top:0, behavior:'smooth'});
+};
+$('#hudEvidenceBtn').onclick = showEvidenceModal;
+$('#closeEvidence').onclick = ()=> $('#evidenceModal').classList.add('hidden');
+$('#hudLeaderboardBtn').onclick = showLeaderboardModal;
+
+$('#cancelTeacherPw').onclick = ()=> $('#teacherPwModal').classList.add('hidden');
+$('#submitTeacherPw').onclick = ()=>{
+  const pw = $('#teacherPwInput').value;
+  if(pw === 'Order-66'){
+    $('#teacherPwModal').classList.add('hidden');
+    $('#landing').classList.add('hidden');
+    $('#teacherScreen').classList.remove('hidden');
+    renderTeacherScreen();
+  } else {
+    $('#teacherPwError').textContent = 'Incorrect authorization code.';
+  }
+};
+$('#teacherPwInput').addEventListener('keydown', e=>{
+  if(e.key === 'Enter') $('#submitTeacherPw').click();
+});
+
+$('#teacherBackBtn').onclick = ()=>{
+  $('#teacherScreen').classList.add('hidden');
+  $('#landing').classList.remove('hidden');
+};
+$('#teacherClearAllBtn').onclick = async ()=>{
+  if(confirm('This will permanently clear every leaderboard entry. Continue?')){
+    await teacherClearAll();
+    renderTeacherScreen();
+  }
+};
+
+$('#seedMapBtn').onclick = async ()=>{
+  const key = $('#mapAdminKeyInput').value.trim();
+  const statusEl = $('#seedMapStatus');
+  statusEl.style.color = '';
+  if(!key){ statusEl.textContent = 'Enter your MAP_ADMIN_KEY first.'; return; }
+  const btn = $('#seedMapBtn');
+  btn.disabled = true; btn.textContent = 'Downloading map data…';
+  statusEl.textContent = '';
+  try{
+    // Public source, fetched once by an admin's own browser — never bundled or re-hosted by us.
+    const dataRes = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json');
+    if(!dataRes.ok) throw new Error('Could not download world map data (HTTP ' + dataRes.status + ')');
+    const text = await dataRes.text();
+    btn.textContent = 'Uploading to your Worker…';
+    const putRes = await fetch('/api/map', {
+      method:'PUT',
+      headers:{'Content-Type':'application/json', 'X-Admin-Key': key},
+      body: text
+    });
+    const result = await putRes.json().catch(()=>({}));
+    if(!putRes.ok) throw new Error(result.error || ('Upload failed (HTTP ' + putRes.status + ')'));
+    statusEl.style.color = 'var(--pin-green)';
+    statusEl.textContent = `Success — stored ${result.bytes ? result.bytes.toLocaleString() : ''} bytes in MAP_KV. The situation map will now load from your own site.`;
+  }catch(e){
+    statusEl.style.color = 'var(--red-string)';
+    statusEl.textContent = 'Failed: ' + e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Seed Map Data';
+};
+
+$('#checkAiStatusBtn').onclick = async ()=>{
+  const btn = $('#checkAiStatusBtn');
+  const resultEl = $('#aiStatusResult');
+  btn.disabled = true; btn.textContent = 'Checking…';
+  resultEl.textContent = '';
+  try{
+    const res = await fetch('/api/ai-status');
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+    const lines = [];
+    lines.push((data.grokConfigured ? '✅' : '⬜') + ' Grok (xAI): ' + (data.grokConfigured ? 'connected, model "' + data.grokModel + '"' : 'not configured (XAI_API_KEY not set — this is optional)'));
+    lines.push((data.workersAiConfigured ? '✅' : '⬜') + ' Workers AI: ' + (data.workersAiConfigured ? 'connected' : 'not configured (AI binding missing)'));
+    if(!data.grokConfigured && !data.workersAiConfigured){
+      lines.push('');
+      lines.push('⚠️ Neither backend is connected — the Chrono Archivist and Field Quiz will not work until at least one is set up. See README.md, Part 4.');
+    }
+    resultEl.innerHTML = lines.join('<br>');
+  }catch(e){
+    resultEl.textContent = 'Could not reach /api/ai-status: ' + e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Check AI Backend Status';
+};
+
+// Lock body scroll on mobile whenever any modal is open — prevents the page
+// from scrolling behind the modal (a common iOS Safari failure mode).
+function syncModalBodyLock(){
+  const anyOpen = Array.from(document.querySelectorAll('.modal-backdrop')).some(m=>!m.classList.contains('hidden'));
+  document.body.classList.toggle('modal-open', anyOpen);
+}
+document.querySelectorAll('.modal-backdrop').forEach(m=>{
+  new MutationObserver(syncModalBodyLock).observe(m, {attributes:true, attributeFilter:['class']});
+});
+document.querySelectorAll('.modal-backdrop').forEach(m=>{
+  m.addEventListener('click', e=>{ if(e.target === m && m.id !== 'teacherPwModal') m.classList.add('hidden'); });
+});
+</script>
+</body>
+</html>
